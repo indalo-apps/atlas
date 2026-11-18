@@ -30,12 +30,12 @@
   --f-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #0b1318; --sea: #0f1d26; --land: #2b3e4a; --land-dim: #1b2a33; --foreign: #1c2b34; --line: #5d7686;
+  --bg: #0b1318; --sea: #0f1d26; --land: #34495a; --land-dim: #1e2e38; --foreign: #18242c; --line: #5d7686;
   --ink: #e8eef2; --muted: #9db0bc; --panel: #152129; --rule: #2a3d49; --scrim: rgba(0, 0, 0, .55); --halo: #1d3442; --shadow: rgba(0, 0, 0, .35); --ccaa: rgba(170, 192, 206, .42); --river: #4a83b5;
   --c0: #423d2b; --c1: #2d4234; --c2: #48322f; --c3: #2b3b4f; --c4: #3b324c; --c5: #274440;
   --accent: #7aaaff; --accent-ink: #0b1620; --ok: #52c98f; --warn: #ecb04e; --bad: #ff7a70; color-scheme: dark } }
 :root[data-theme="dark"] {
-  --bg: #0b1318; --sea: #0f1d26; --land: #2b3e4a; --land-dim: #1b2a33; --foreign: #1c2b34; --line: #5d7686;
+  --bg: #0b1318; --sea: #0f1d26; --land: #34495a; --land-dim: #1e2e38; --foreign: #18242c; --line: #5d7686;
   --ink: #e8eef2; --muted: #9db0bc; --panel: #152129; --rule: #2a3d49; --scrim: rgba(0, 0, 0, .55); --halo: #1d3442; --shadow: rgba(0, 0, 0, .35); --ccaa: rgba(170, 192, 206, .42); --river: #4a83b5;
   --c0: #423d2b; --c1: #2d4234; --c2: #48322f; --c3: #2b3b4f; --c4: #3b324c; --c5: #274440;
   --accent: #7aaaff; --accent-ink: #0b1620; --ok: #52c98f; --warn: #ecb04e; --bad: #ff7a70; color-scheme: dark }
@@ -83,7 +83,7 @@ svg#map { width: 100%; height: auto; display: block; touch-action: manipulation;
 /* Ceuta y Melilla: un punto visible y una zona táctil invisible más grande */
 .marker { fill: transparent; stroke: none; cursor: pointer; }
 .marker.off { pointer-events: none; }
-.prov.cm-dot { stroke: var(--ink); stroke-opacity: .55; stroke-width: 1.2; pointer-events: none; }
+.prov.cm-dot { stroke: var(--line); stroke-width: 1.2; pointer-events: none; filter: drop-shadow(0 0 1.5px var(--halo)) drop-shadow(0 0 2px var(--halo)); }
 .prov.cm-dot.off { opacity: .45; }
 .cm-lbl { font-family: var(--f-body); font-weight: 700; fill: var(--ink); dominant-baseline: middle; pointer-events: none; display: none;
   paint-order: stroke; stroke: var(--sea); stroke-width: 3px; stroke-linejoin: round; }
@@ -137,7 +137,7 @@ body.mode-explore svg.zoomed .provname { display: inline; }
 
 .mapstage { position: relative; min-height: 0; }
 .zoomctl { position: absolute; right: 12px; bottom: 12px; display: flex; flex-direction: column; gap: 6px; }
-.zoomctl button, .iconbtn { width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--rule); background: var(--panel); color: var(--ink);
+.zoomctl button, .iconbtn { width: 44px; height: 44px; border-radius: 10px; border: 1px solid var(--rule); background: var(--panel); color: var(--ink);
   font: 600 1.25rem/1 var(--f-mono); cursor: pointer; display: grid; place-items: center; padding: 0; }
 .zoomctl button:hover:not(:disabled), .iconbtn:hover { border-color: var(--accent); }
 .zoomctl button:disabled { opacity: .4; cursor: default; }
@@ -182,11 +182,15 @@ svg#map:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; 
 .modes button, .btn, .opt, select {
   font: inherit; color: var(--ink); background: var(--bg); border: 1.5px solid transparent; border-radius: 10px;
   padding: 9px 10px; cursor: pointer; text-align: left; }
-.modes button { font-size: 0.88rem; line-height: 1.2; display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 10px; align-items: center; }
+.modes button { font-size: 0.88rem; line-height: 1.2; display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 10px; row-gap: 2px;
+  align-items: center; align-content: center; }
+/* Si un grupo tiene un número impar de modos, el último ocupa todo el ancho */
+.modes > button:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.modes button span .num { font-weight: inherit; }
 .modes button svg { grid-row: span 2; width: 26px; height: 26px; fill: none; stroke: var(--accent); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .modes button b, .modes button span { grid-column: 2; }
 .modes button b { display: block; font-family: var(--f-display); font-weight: 600; font-size: 0.98rem; }
-.modes button span { color: var(--muted); font-size: 0.78rem; }
+.modes button span { color: var(--muted); font-size: 0.8rem; }
 .modes button:disabled { opacity: .5; cursor: default; }
 /* Al pulsar, los botones se hunden un poco: se nota el toque, sobre todo en el móvil */
 .modes button, .btn, .opt, .iconbtn, .zoomctl button, .soundbtn { transition: transform .09s ease, background-color .15s ease, border-color .15s ease; }
@@ -194,6 +198,8 @@ svg#map:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; 
   transform: scale(.96); }
 .duecard:not(:disabled) { border-color: color-mix(in srgb, var(--ok) 50%, transparent); background: color-mix(in srgb, var(--ok) 10%, var(--panel)); }
 .duecard:not(:disabled) svg { stroke: var(--ok); }
+.modes button.duecard:disabled { opacity: 1; background: transparent; border: 1.5px dashed var(--rule); }
+.duecard:disabled b { color: var(--muted); } .duecard:disabled svg { stroke: var(--muted); }
 .modeopts { display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 12px; background: color-mix(in srgb, var(--accent) 6%, var(--panel));
   border: 1px solid var(--rule); }
 .menufoot { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
@@ -259,6 +265,7 @@ label.field { display: flex; flex-direction: column; gap: 6px; font-size: 0.85re
 @keyframes swap-in { from { opacity: 0; transform: translateY(8px); } }
 .subname { color: var(--muted); font-size: 0.9rem; margin: 0; min-height: 1.3em; }
 .feedback { min-height: 2.6em; margin: 4px 0 0; font-size: 0.95rem; }
+.question > .row { order: 1; margin-top: 6px; } .question > .feedback { order: 2; min-height: 2.6em; margin: 0; }
 .feedback.ok { color: var(--ok); } .feedback.bad { color: var(--bad); } .feedback.warn { color: var(--warn); }
 .options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .opt { font-weight: 700; text-align: center; padding: 12px 8px; background: var(--bg); }
@@ -313,7 +320,8 @@ a.btn { text-decoration: none; display: inline-block; }
 @media (max-width: 860px), (max-height: 520px) {
   html, body { overflow: hidden; overscroll-behavior: none; }
   .app { height: 100%; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto; gap: 8px;
-    padding-block: 8px; align-items: stretch; }
+    padding-block: 8px; align-items: stretch;
+    padding-left: max(8px, env(safe-area-inset-left, 0px)); padding-right: max(8px, env(safe-area-inset-right, 0px)); }
   .app > .panel { display: contents; }
   #qcard, #infocard { grid-row: 1; grid-column: 1; }
   .app > .mapwrap { grid-row: 2; grid-column: 1; }
@@ -339,7 +347,7 @@ a.btn { text-decoration: none; display: inline-block; }
   .stats { grid-template-columns: repeat(3, auto); justify-content: space-between; }
   .stat { flex-direction: row; align-items: baseline; gap: 5px; }
   .stat b { font-size: 1rem; }
-  .stat span { font-size: 0.62rem; }
+  .stat span { font-size: 0.72rem; }
   .barrow { display: flex; gap: 8px; }
   .barrow .btn { padding: 10px 12px; }
   #statcard .options .opt { padding: 13px 8px; }
@@ -356,7 +364,7 @@ a.btn { text-decoration: none; display: inline-block; }
   #setcard::before, #endcard::before { content: ""; align-self: center; width: 40px; height: 5px; border-radius: 99px; background: var(--rule); margin: -6px 0 2px; }
   #setcard .modes button { padding: 12px; }
   #z-in, #z-out, #z-reset:disabled { display: none; }
-  .zoomctl button { width: 36px; height: 36px; background: color-mix(in srgb, var(--panel) 82%, transparent); }
+  .zoomctl button { width: 44px; height: 44px; background: color-mix(in srgb, var(--panel) 82%, transparent); }
   #openSettings { display: none; }
   body.mode-explore #openSettings { display: grid; }
   .streak { top: 10px; right: 10px; }
@@ -452,14 +460,14 @@ body.tablet .keyhelp .kh-mouse { display: none; } body.tablet .keyhelp .kh-touch
       <div class="modes" role="group" aria-label="Practicar">
         <button id="m-find" data-mode="find" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5"/></svg><b>Encuéntrala</b><span>Toca la provincia</span></button>
         <button id="m-name" data-mode="name" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.3 9.3a2.8 2.8 0 0 1 5.4 1c0 1.9-2.7 2.3-2.7 4.2"/><path d="M12 17.3v.2"/></svg><b>¿Cuál es?</b><span>Elige el nombre</span></button>
-        <button id="m-cap" data-mode="cap" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.2 6-5.5-3-5.5 3 1.2-6-4.5-4.2 6.1-.8z"/></svg><b>Capitales</b><span>¿Dónde está la capital?</span></button>
-        <button id="m-gent" data-mode="gent" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 19.5c.6-3 2.7-4.8 5.5-4.8s4.9 1.8 5.5 4.8"/><circle cx="16.8" cy="9.3" r="2.3"/><path d="M15.8 14.8c2.4-.2 4.2 1.3 4.7 4"/></svg><b>Gentilicios</b><span>¿Dónde viven los…?</span></button>
+        <button id="m-cap" data-mode="cap" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.2 6-5.5-3-5.5 3 1.2-6-4.5-4.2 6.1-.8z"/></svg><b>Capitales</b><span>Busca la capital</span></button>
+        <button id="m-gent" data-mode="gent" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 19.5c.6-3 2.7-4.8 5.5-4.8s4.9 1.8 5.5 4.8"/><circle cx="16.8" cy="9.3" r="2.3"/><path d="M15.8 14.8c2.4-.2 4.2 1.3 4.7 4"/></svg><b>Gentilicios</b><span>Por el gentilicio</span></button>
         <button id="m-shape" data-mode="shape" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 8l3.8-3.5 3.4 2 3.8-1.4 2.8 3.7-1.4 3.7 1.9 3.4-4.2 2.9-3.3-1-3.8 1.9-2.8-3.3.5-3.8z"/></svg><b>Siluetas</b><span>Reconoce la forma</span></button>
       </div>
       <p class="eyebrow">Retos</p>
       <div class="modes" role="group" aria-label="Retos">
         <button id="m-time" data-mode="time" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13.5" r="7"/><path d="M12 13.5V10M9.5 3h5M12 3v3.5M18 7.5l1.5-1.5"/></svg><b>Contrarreloj</b><span><span class="num">60</span> segundos</span></button>
-        <button id="m-duel" data-mode="duel" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 4.5l8 8M19.5 4.5l-8 8"/><path d="M7 17l-3 3M17 17l3 3M5 14.5l4.5 4.5M19 14.5L14.5 19"/></svg><b>Duelo</b><span>Dos jugadores, por turnos</span></button>
+        <button id="m-duel" data-mode="duel" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 4.5l8 8M19.5 4.5l-8 8"/><path d="M7 17l-3 3M17 17l3 3M5 14.5l4.5 4.5M19 14.5L14.5 19"/></svg><b>Duelo</b><span>Dos jugadores</span></button>
       </div>
       <div class="modeopts" id="modeOpts">
         <p class="eyebrow" id="optsTitle">Opciones</p>
@@ -481,7 +489,7 @@ body.tablet .keyhelp .kh-mouse { display: none; } body.tablet .keyhelp .kh-touch
       </div>
       <div class="menufoot">
         <button class="soundbtn" id="sound" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path class="wave" d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/><path class="mute" d="M16 9.5l5 5M21 9.5l-5 5"/></svg><span id="soundTxt">Sonido</span></button>
-        <p class="note" id="verLine" title="Generada el 18 de noviembre de 2026, 19:17">Versión 2</p>
+        <p class="note" id="verLine" title="Generada el 18 de noviembre de 2026, 23:55">Versión 3</p>
       </div>
     </div>
 
@@ -871,11 +879,11 @@ function setCanaryLayout(below) {
   if (tr) canShadow.attr("transform", tr + " translate(1.5,2.5)"); else canShadow.attr("transform", "translate(1.5,2.5)");
   Object.keys(cCache).forEach(k => delete cCache[k]);
   const extra = insetBox ? [[tCan([insetBox[0], insetBox[1]]), tCan([insetBox[0] + insetBox[2], insetBox[1] + insetBox[3]])]] : [];
-  HOME = boundsOf(ALL, mode === "below" ? 0.02 : 0.03, mode === "below" ? extra : []);
+  HOME = boundsOf(ALL, mode === "below" ? 0.016 : 0.03, mode === "below" ? extra : []);
   if (mode === "side") HOME[3] += HOME[3] * 0.05; // un poco más de costa africana bajo Ceuta y Melilla
   svg.style("aspect-ratio", String(HOME[2] / HOME[3]));
   markers.attr("r", HOME[2] * 0.022);
-  cmDots.attr("r", HOME[2] * 0.0062);
+  cmDots.attr("r", HOME[2] * 0.0075);
   cmLbl.attr("x", f => path.centroid(f)[0] + HOME[2] * 0.012);
   // con el recuadro debajo, los rótulos de África quedarían tapados
   paisText.attr("display", d => mode === "below" && (d[0] === "Marruecos" || d[0] === "Argelia") ? "none" : null);
@@ -1004,6 +1012,7 @@ function applyRegionView() {
   zoomTo(S.region === "all" ? null : ids);
   $("#regionLabel").textContent = S.region === "all" ? "España" : S.region;
   $("#regionChip").textContent = S.region === "all" ? "España" : S.region;
+  $("#regionChip").hidden = S.region === "all"; // con España entera, el rótulo solo tapaba Galicia
 }
 
 // ---------- Repaso entre días ----------
@@ -1332,6 +1341,7 @@ function renderStats() {
   const pct = S.total ? Math.round(Math.max(0, done) / S.total * 100) : 0;
   if (S.mode !== "time") $("#bar").style.width = pct + "%";
   $("#progress").setAttribute("aria-valuenow", pct);
+  $("#restart").hidden = !(S.hits + S.errors > 0 || Object.keys(S.results).length > 0 || (S.mode === "duel" && S.qn > 1));
 }
 
 // Confeti para celebrar partidas perfectas, récords y victorias (no se lanza si se pide menos movimiento)
@@ -1732,6 +1742,8 @@ if (savedMode && document.querySelector('[data-mode="' + savedMode + '"]')) {
   pressMode(savedMode);
 }
 if (savedRegion && REGIONS.some(r => r[0] === savedRegion)) { S.region = savedRegion; sel.value = savedRegion; }
+// Primera visita en escritorio: se empieza explorando el mapa, con el menú de modos a la vista
+if (!savedMode && !mqMobile.matches) { S.mode = "explore"; pressMode("explore"); }
 renderModeExtras();
 newGame();
 if (!savedMode && mqMobile.matches) openSheet(true);

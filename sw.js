@@ -1,5 +1,5 @@
 // Service worker del Atlas de Provincias: guarda el juego para usarlo sin conexión.
-const CACHE = "atlas-4493825509";
+const CACHE = "atlas-v3-20261118";
 const ARCHIVOS = [
   "./",
   "index.html",
