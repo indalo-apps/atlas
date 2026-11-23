@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="3.3">
+<meta name="app-version" content="3.4">
 <title>Atlas de Provincias</title>
 <meta name="author" content="Adela Moreno Vega y Carlos Moreno Otto">
 <meta name="copyright" content="© 2026 Adela Moreno Vega y Carlos Moreno Otto. Todos los derechos reservados.">
@@ -254,6 +254,7 @@ svg#map:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; 
 .grp .modes button { min-height: 58px; padding: 10px 12px; }
 .grp .modes button b { font-size: 1.02rem; } .grp .modes button span { font-size: 0.84rem; }
 .minimap { display: none; }
+.topbar { display: none; }
 .zbackdrop { position: fixed; inset: 0; background: var(--scrim); z-index: 40; animation: fade .2s ease; }
 .zonesheet { position: fixed; z-index: 41; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(460px, calc(100% - 32px)); max-height: 88%; overflow: auto;
   box-sizing: border-box; background: var(--panel); color: var(--ink); border-radius: 20px; padding: 18px; display: flex; flex-direction: column; gap: 12px;
@@ -449,6 +450,21 @@ a.btn { text-decoration: none; display: inline-block; }
   #setcard .zonebtn, #setcard .seg { flex: none; }
   #setcard .seg { background: var(--rule); }
   #setcard .grp .modes button { background: var(--panel); }
+  .homebar { position: sticky; top: calc(-12px - env(safe-area-inset-top, 0px)); z-index: 2; display: flex; flex-direction: column; gap: 10px;
+    margin: 0 -16px; padding: 8px 16px; background: var(--bg); }
+  .app { grid-template-rows: auto auto minmax(0, 1fr) auto; }
+  .topbar { display: flex; grid-row: 1; grid-column: 1; gap: 6px; align-items: stretch; }
+  #qcard, #infocard { grid-row: 2; } .app > .mapwrap { grid-row: 3; } #statcard { grid-row: 4; }
+  .tb-zone { display: flex; align-items: center; gap: 4px; min-height: 44px; max-width: 42%; padding: 0 8px 0 6px; border-radius: 12px; cursor: pointer;
+    border: 1.5px solid var(--rule); background: var(--panel); color: var(--ink); font: 700 0.88rem/1.1 var(--f-body); }
+  .tb-zone b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .tb-zone svg { flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .tb-zone .zb-pin { width: 18px; height: 18px; color: var(--accent); } .tb-zone .tb-chev { width: 16px; height: 16px; color: var(--accent); }
+  .tb-tabs { flex: 1; display: flex; gap: 2px; padding: 3px; border-radius: 12px; background: var(--rule); min-width: 0; }
+  .tb-tabs button { flex: 1; min-width: 0; min-height: 38px; border: 0; border-radius: 9px; background: transparent; color: var(--muted); cursor: pointer;
+    font: 600 0.86rem/1 var(--f-display); padding: 0 2px; }
+  .tb-tabs button[aria-current="true"] { background: var(--panel); color: var(--accent); box-shadow: 0 1px 3px var(--shadow); }
+  .tb-zone:focus-visible, .tb-tabs button:focus-visible { outline: 2.5px solid var(--accent); outline-offset: 2px; }
   .minimap { display: block; flex: none; position: relative; border-radius: 14px; overflow: hidden; background: var(--sea); height: 230px; }
   .minimap svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
   #setcard > .row { position: sticky; bottom: calc(-12px - env(safe-area-inset-bottom, 0px)); margin: 0 -16px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); background: var(--bg); z-index: 1; }
@@ -688,6 +704,14 @@ const IK = (function(){
 
 
 <div class="app">
+  <nav class="topbar" id="topbar" aria-label="Menú">
+    <button type="button" class="tb-zone" id="tbZone" aria-haspopup="dialog" aria-label="Zona: Toda España. Cambiar de zona"><svg class="zb-pin" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-6.2-6.5-11.2a6.5 6.5 0 0 1 13 0C18.5 14.8 12 21 12 21z"/><circle cx="12" cy="9.8" r="2.3"/></svg><b id="tbZoneName">Toda España</b><svg class="tb-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button>
+    <div class="tb-tabs">
+      <button type="button" data-tab="aprender">Aprender</button>
+      <button type="button" data-tab="practicar">Practicar</button>
+      <button type="button" data-tab="jugar">Jugar</button>
+    </div>
+  </nav>
   <section class="mapwrap" aria-label="Mapa de España">
     <div class="maphead">
       <h1 class="brand">Atlas de Provincias<small><span class="num">50</span> provincias y <span class="num">2</span> ciudades autónomas</small></h1>
@@ -727,6 +751,7 @@ const IK = (function(){
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
         </button>
       </div>
+      <div class="homebar">
       <button type="button" class="zonebtn" id="zoneBtn" aria-haspopup="dialog" aria-label="Zona: Toda España. Cambiar de zona">
         <svg class="zb-pin" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-6.2-6.5-11.2a6.5 6.5 0 0 1 13 0C18.5 14.8 12 21 12 21z"/><circle cx="12" cy="9.8" r="2.3"/></svg>
         <span class="zb-txt"><small>Zona</small><b id="zoneName">Toda España</b></span>
@@ -736,6 +761,7 @@ const IK = (function(){
         <button type="button" role="tab" id="tab-aprender" data-tab="aprender" aria-controls="grp-aprender" aria-selected="false" tabindex="-1">Aprender</button>
         <button type="button" role="tab" id="tab-practicar" data-tab="practicar" aria-controls="grp-practicar" aria-selected="true">Practicar</button>
         <button type="button" role="tab" id="tab-jugar" data-tab="jugar" aria-controls="grp-jugar" aria-selected="false" tabindex="-1">Jugar</button>
+      </div>
       </div>
       <div class="minimap" id="miniMap" aria-hidden="true"></div>
       <div class="grp" id="grp-aprender" role="tabpanel" aria-labelledby="tab-aprender" hidden>
@@ -1923,6 +1949,8 @@ REGIONS.forEach(([v]) => {
 });
 function renderZone() {
   $("#zoneName").textContent = zoneName(S.region);
+  $("#tbZoneName").textContent = zoneName(S.region);
+  $("#tbZone").setAttribute("aria-label", "Zona: " + zoneName(S.region) + ". Cambiar de zona");
   $("#zoneBtn").setAttribute("aria-label", "Zona: " + zoneName(S.region) + ". Cambiar de zona");
   $("#zoneGrid").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b.dataset.zone === S.region));
 }
@@ -1939,6 +1967,11 @@ function closeZones() {
   return true;
 }
 $("#zoneBtn").addEventListener("click", openZones);
+$("#setcard").addEventListener("transitionend", e => { if (e.target.id === "setcard" && e.propertyName === "transform") pintarMiniMapa(); });
+$("#tbZone").addEventListener("click", openZones);
+// Barra superior de la partida: cada pestaña abre el inicio en esa pestaña
+document.querySelectorAll(".tb-tabs button").forEach(b => b.addEventListener("click", () => { openSheet(false); showTab(b.dataset.tab); }));
+function renderTopTabs() { document.querySelectorAll(".tb-tabs button").forEach(b => b.setAttribute("aria-current", b.dataset.tab === TAB_OF[S.mode])); }
 $("#zoneClose").addEventListener("click", closeZones);
 $("#zoneDone").addEventListener("click", closeZones);
 $("#zoneBackdrop").addEventListener("click", closeZones);
@@ -2005,7 +2038,7 @@ let lastFocus = null;
 function openSheet(first) {
   if (!mqMobile.matches) return;
   $("#setTitle").innerHTML = mqHome.matches ? 'Atlas de Provincias<small><span class="num">50</span> provincias y <span class="num">2</span> ciudades autónomas</small>' : "¿Qué quieres hacer?";
-  pintarMiniMapa(); setTimeout(pintarMiniMapa, 700);
+  requestAnimationFrame(pintarMiniMapa); setTimeout(pintarMiniMapa, 700);
   $("#sheetPlay").textContent = first ? "Empezar" : "Seguir jugando";
   $("#restart2").hidden = !!first;
   if (TAB_OF[S.mode]) showTab(TAB_OF[S.mode]);
@@ -2114,6 +2147,7 @@ function renderModeExtras() {
   $("#capOnlyRow").hidden = S.mode !== "cap"; $("#duelRow").hidden = S.mode !== "duel";
   $("#modeOpts").hidden = S.mode !== "cap" && S.mode !== "duel"; // la zona ya va arriba
   if (TAB_OF[S.mode]) showTab(TAB_OF[S.mode]);
+  renderTopTabs();
   const b = $('.modes button[data-mode="' + S.mode + '"]');
   $("#optsTitle").textContent = "Opciones · " + (b ? b.querySelector("b").textContent : "");
   renderDue();
@@ -2188,6 +2222,7 @@ if ("serviceWorker" in navigator) {
 (function () {
   const VERSION = document.querySelector('meta[name="app-version"]').content;
   const NOVEDADES = [
+    ["3.4", ["📌 La zona y las pestañas se quedan siempre arriba: en el inicio al desplazarte y también durante la partida"]],
     ["3.3", ["🏠 En el móvil, la app se abre en una pantalla de inicio: zona y pestañas arriba, el mapa de la zona y los modos debajo"]],
     ["3.2", ["📍 La zona va arriba del todo: tócala para elegir Toda España o una comunidad",
              "🗂️ Menú más claro con tres pestañas: Aprender, Practicar y Jugar"]],
