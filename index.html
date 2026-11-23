@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="3.2">
+<meta name="app-version" content="3.3">
 <title>Atlas de Provincias</title>
 <meta name="author" content="Adela Moreno Vega y Carlos Moreno Otto">
 <meta name="copyright" content="© 2026 Adela Moreno Vega y Carlos Moreno Otto. Todos los derechos reservados.">
@@ -253,6 +253,7 @@ svg#map:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; 
 .grp .modes { grid-template-columns: minmax(0, 1fr); }
 .grp .modes button { min-height: 58px; padding: 10px 12px; }
 .grp .modes button b { font-size: 1.02rem; } .grp .modes button span { font-size: 0.84rem; }
+.minimap { display: none; }
 .zbackdrop { position: fixed; inset: 0; background: var(--scrim); z-index: 40; animation: fade .2s ease; }
 .zonesheet { position: fixed; z-index: 41; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(460px, calc(100% - 32px)); max-height: 88%; overflow: auto;
   box-sizing: border-box; background: var(--panel); color: var(--ink); border-radius: 20px; padding: 18px; display: flex; flex-direction: column; gap: 12px;
@@ -438,6 +439,21 @@ a.btn { text-decoration: none; display: inline-block; }
   .app.fitted #statcard .options .opt { padding: 16px 8px; font-size: 1.05rem; }
 }
 @media (min-width: 861px) and (min-height: 521px) { .mobile-only { display: none !important; } }
+/* 3.3 · En el móvil (vertical) el menú es la pantalla de inicio: título, zona y pestañas arriba, el mapa y los modos debajo */
+@media (max-width: 599px) and (min-height: 521px) {
+  #setcard { inset: 0; max-height: none; border-radius: 0; box-shadow: none; background: var(--bg); gap: 12px;
+    padding: calc(12px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-left, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-right, 0px)); }
+  #setcard::before { display: none; }
+  #setcard .sheet-head h2 { font-size: 1.5rem; letter-spacing: -0.01em; }
+  #setcard .sheet-head small { display: block; font-family: var(--f-body); font-weight: 400; font-size: 0.82rem; color: var(--muted); letter-spacing: 0; }
+  #setcard .zonebtn, #setcard .seg { flex: none; }
+  #setcard .seg { background: var(--rule); }
+  #setcard .grp .modes button { background: var(--panel); }
+  .minimap { display: block; flex: none; position: relative; border-radius: 14px; overflow: hidden; background: var(--sea); height: 230px; }
+  .minimap svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  #setcard > .row { position: sticky; bottom: calc(-12px - env(safe-area-inset-bottom, 0px)); margin: 0 -16px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); background: var(--bg); z-index: 1; }
+  body.sheet-open .backdrop { display: none; }
+}
 @keyframes sheet-in { from { transform: translateY(100%); } }
 
 /* Móvil en horizontal: mapa a la izquierda, columna estrecha a la derecha */
@@ -721,6 +737,7 @@ const IK = (function(){
         <button type="button" role="tab" id="tab-practicar" data-tab="practicar" aria-controls="grp-practicar" aria-selected="true">Practicar</button>
         <button type="button" role="tab" id="tab-jugar" data-tab="jugar" aria-controls="grp-jugar" aria-selected="false" tabindex="-1">Jugar</button>
       </div>
+      <div class="minimap" id="miniMap" aria-hidden="true"></div>
       <div class="grp" id="grp-aprender" role="tabpanel" aria-labelledby="tab-aprender" hidden>
       <div class="modes" role="group" aria-label="Aprender">
         <button id="m-explore" data-mode="explore" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.2 15.2L20.5 20.5"/></svg><b>Explorar</b><span>Sin preguntas</span></button>
@@ -1846,6 +1863,28 @@ const sel = $("#region");
 REGIONS.forEach(([v, t]) => { const o = document.createElement("option"); o.value = v; o.textContent = t; sel.appendChild(o); });
 sel.addEventListener("change", () => { S.region = sel.value; store.set("atlas:region", S.region); newGame(); });
 
+// ---------- 3.3 · Inicio en el móvil: copia del mapa con la zona elegida ----------
+const mqHome = matchMedia("(max-width: 599px) and (min-height: 521px)");
+function pintarMiniMapa() {
+  const box = $("#miniMap");
+  if (!mqHome.matches || !document.body.classList.contains("sheet-open")) { box.textContent = ""; return; }
+  const c = svg.node().cloneNode(true);
+  c.removeAttribute("id"); c.removeAttribute("tabindex"); c.removeAttribute("role"); c.removeAttribute("aria-label"); c.removeAttribute("aria-roledescription");
+  c.setAttribute("aria-hidden", "true"); c.setAttribute("focusable", "false");
+  c.querySelectorAll(".kfocus,.hit,.miss,.flash").forEach(e => e.classList.remove("kfocus", "hit", "miss", "flash"));
+  box.replaceChildren(c);
+  // Encuadra las provincias de la zona, medidas sobre la propia copia
+  try {
+    const m = c.getScreenCTM().inverse(); let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    c.querySelectorAll(".prov:not(.off):not(.nogame)").forEach(el => {
+      const r = el.getBoundingClientRect(); if (!r.width) return;
+      const a = new DOMPoint(r.left, r.top).matrixTransform(m), b = new DOMPoint(r.right, r.bottom).matrixTransform(m);
+      x0 = Math.min(x0, a.x); y0 = Math.min(y0, a.y); x1 = Math.max(x1, b.x); y1 = Math.max(y1, b.y);
+    });
+    if (isFinite(x0)) { const px = (x1 - x0) * 0.05, py = (y1 - y0) * 0.05; c.setAttribute("viewBox", [x0 - px, y0 - py, x1 - x0 + 2 * px, y1 - y0 + 2 * py].join(" ")); c.setAttribute("preserveAspectRatio", "xMidYMid meet"); }
+  } catch (e) {}
+}
+
 // ---------- 3.2 · Pestañas Aprender / Practicar / Jugar ----------
 const TAB_OF = { explore: "aprender", find: "practicar", name: "practicar", cap: "practicar", gent: "practicar", shape: "practicar", time: "jugar", duel: "jugar" };
 const tabs = [...document.querySelectorAll('.seg [role="tab"]')];
@@ -1877,7 +1916,7 @@ REGIONS.forEach(([v]) => {
   b.querySelector(".zc").textContent = zoneCount(v);
   b.setAttribute("aria-label", zoneName(v) + ", " + zoneCount(v) + (v === "all" ? " provincias y ciudades" : " provincias"));
   b.addEventListener("click", () => {
-    if (S.region !== v) { sel.value = v; sel.dispatchEvent(new Event("change")); }
+    if (S.region !== v) { sel.value = v; sel.dispatchEvent(new Event("change")); setTimeout(pintarMiniMapa, 50); setTimeout(pintarMiniMapa, 900); }
     closeZones();
   });
   $("#zoneGrid").appendChild(b);
@@ -1965,7 +2004,8 @@ svg.on("click.near", e => {
 let lastFocus = null;
 function openSheet(first) {
   if (!mqMobile.matches) return;
-  $("#setTitle").textContent = "¿Qué quieres hacer?";
+  $("#setTitle").innerHTML = mqHome.matches ? 'Atlas de Provincias<small><span class="num">50</span> provincias y <span class="num">2</span> ciudades autónomas</small>' : "¿Qué quieres hacer?";
+  pintarMiniMapa(); setTimeout(pintarMiniMapa, 700);
   $("#sheetPlay").textContent = first ? "Empezar" : "Seguir jugando";
   $("#restart2").hidden = !!first;
   if (TAB_OF[S.mode]) showTab(TAB_OF[S.mode]);
@@ -2100,7 +2140,8 @@ if (savedRegion && REGIONS.some(r => r[0] === savedRegion)) { S.region = savedRe
 if (!savedMode && !mqMobile.matches) { S.mode = "explore"; pressMode("explore"); }
 renderModeExtras();
 newGame();
-if (!savedMode && mqMobile.matches) openSheet(true);
+// En el móvil en vertical la app se abre siempre en la pantalla de inicio; en el resto, solo la primera vez
+if (mqHome.matches || (!savedMode && mqMobile.matches)) openSheet(true);
 </script>
 
 <script>
@@ -2147,6 +2188,7 @@ if ("serviceWorker" in navigator) {
 (function () {
   const VERSION = document.querySelector('meta[name="app-version"]').content;
   const NOVEDADES = [
+    ["3.3", ["🏠 En el móvil, la app se abre en una pantalla de inicio: zona y pestañas arriba, el mapa de la zona y los modos debajo"]],
     ["3.2", ["📍 La zona va arriba del todo: tócala para elegir Toda España o una comunidad",
              "🗂️ Menú más claro con tres pestañas: Aprender, Practicar y Jugar"]],
     ["3.1", ["⚙️ Nuevos Ajustes: instalar la app, autores, aviso y «Buscar actualizaciones»",

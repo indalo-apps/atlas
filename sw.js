@@ -1,6 +1,6 @@
 // Service worker del Atlas de Provincias: guarda el juego para usarlo sin conexión.
 // Al subir una versión nueva, cambia el nombre de la caché y se borra la anterior.
-const CACHE = "atlas-v3.2-20261123";
+const CACHE = "atlas-v3.3-20261123";
 const ARCHIVOS = [
   "./",
   "index.html",
