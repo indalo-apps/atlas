@@ -1,9 +1,11 @@
 {
   "name": "Atlas de Provincias",
   "short_name": "Provincias",
-  "lang": "es",
+  "description": "Aprende las provincias de España, sus capitales y comunidades jugando con el mapa.",
   "start_url": "./",
   "scope": "./",
+  "id": "./",
+  "lang": "es",
   "display": "standalone",
   "background_color": "#eaf0f3",
   "theme_color": "#1d5fc4",
@@ -11,15 +13,23 @@
     {
       "src": "icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "icon-512.png",
+      "src": "icon-1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

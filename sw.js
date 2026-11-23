@@ -1,5 +1,6 @@
 // Service worker del Atlas de Provincias: guarda el juego para usarlo sin conexión.
-const CACHE = "atlas-v3-20261118";
+// Al subir una versión nueva, cambia el nombre de la caché y se borra la anterior.
+const CACHE = "atlas-v3.1-20261123";
 const ARCHIVOS = [
   "./",
   "index.html",
@@ -13,6 +14,10 @@ const ARCHIVOS = [
   "fonts.css",
   "icon-192.png",
   "icon-512.png",
+  "icon-152.png",
+  "icon-167.png",
+  "icon-maskable-512.png",
+  "favicon-32.png",
   "topojson.min.js"
 ];
 
@@ -29,9 +34,11 @@ self.addEventListener("activate", e => {
 self.addEventListener("fetch", e => {
   const req = e.request;
   if (req.method !== "GET" || new URL(req.url).origin !== location.origin) return;
+  // Comprobación de versión nueva: siempre a la red
+  if (/[?&]v=\d{10,}/.test(req.url)) return;
   if (req.mode === "navigate") {
     // La página: primero internet (para ver la última versión); sin conexión, la copia guardada
-    e.respondWith(fetch(req).then(r => {
+    e.respondWith(fetch(req.url, { cache: "no-store", credentials: "same-origin" }).then(r => {
       const copia = r.clone(); caches.open(CACHE).then(c => c.put("./", copia)); return r;
     }).catch(() => caches.match("./", { ignoreSearch: true })));
     return;
