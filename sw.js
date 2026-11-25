@@ -1,7 +1,7 @@
 // © 2026 Adela Moreno Vega y Carlos Moreno Otto. Todos los derechos reservados.
 // Service worker del Atlas de Provincias: guarda el juego para usarlo sin conexión.
 // Al subir una versión nueva, cambia el nombre de la caché y se borra la anterior.
-const CACHE = "atlas-v3.7-20261125";
+const CACHE = "atlas-v3.8-20261125";
 const ARCHIVOS = [
   "./",
   "index.html",
@@ -13,6 +13,7 @@ const ARCHIVOS = [
   "d3-composite-projections.min.js",
   "d3-parcial.js",
   "europa.js",
+  "america.js",
   "fonts.css",
   "icon-192.png",
   "icon-512.png",
