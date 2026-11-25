@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="3.9">
+<meta name="app-version" content="4.0">
 <title>Atlas de Provincias</title>
 <meta name="author" content="Adela Moreno Vega y Carlos Moreno Otto">
 <meta name="copyright" content="© 2026 Adela Moreno Vega y Carlos Moreno Otto. Todos los derechos reservados.">
@@ -173,6 +173,8 @@ svg#map:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; 
 .check { display: flex; align-items: flex-start; gap: 10px; font-size: 0.9rem; color: var(--ink); cursor: pointer; line-height: 1.3; }
 .check input { width: 20px; height: 20px; margin: 0; accent-color: var(--accent); flex: none; }
 .check small { display: block; color: var(--muted); font-size: 0.8rem; }
+.zs-peq { min-height: 44px; align-items: center; margin: 0 0 8px; }
+.zs-peq[hidden] { display: none; }
 
 /* Mensajes flotantes sobre el mapa */
 .toasts { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 3; }
@@ -953,6 +955,10 @@ const IK = (function(){
         <button type="button" data-mapa="oc" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Oceanía</button>
       </div>
       <p class="zs-note">Vale para todos los modos y se recuerda para la próxima vez. El número es cuántas provincias tiene.</p>
+      <label class="check zs-peq" for="sinPeq" hidden>
+        <input type="checkbox" id="sinPeq">
+        <span>Sin países pequeños<small id="sinPeqTxt"></small></span>
+      </label>
   <div class="zs-grid" id="zoneGrid" role="group" aria-label="Zonas"></div>
   <div class="zs-confirm" id="zoneConfirm" role="alertdialog" aria-labelledby="zcTxt" hidden>
     <p id="zcTxt"></p>
@@ -1604,7 +1610,14 @@ function cls(id, c, on = true) { if (byId[id]) byId[id].classList.toggle(c, on);
 // ---------- Estado ----------
 const S = { mode: "find", region: "all", pool: [], queue: [], cur: null, tries: 0, results: {}, score: 0, streak: 0, best: 0, t0: 0, timer: null, locked: false, requeued: {} };
 
-function poolFor(region) { return ALL.filter(id => enZona(id, region)); }
+// 4.0 · «Sin países pequeños»: quita los países e islas diminutos (los que llevan punto en el mapa), a elección
+const sinPeq = () => EU && store.get(KP + "sinPeq") === true;
+function poolFor(region) {
+  const z = ALL.filter(id => enZona(id, region));
+  if (!sinPeq()) return z;
+  const g = z.filter(id => !DOTS.includes(id));
+  return g.length ? g : z; // si en la zona solo hay islas pequeñas (Micronesia, Polinesia), se quedan
+}
 function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
 function applyRegionView() {
@@ -2232,7 +2245,7 @@ tabs.forEach((b, i) => {
 
 // ---------- 3.2 · Zona arriba, con su propia ventana para elegirla ----------
 const zoneName = ZN;
-const zoneCount = r => ALL.filter(id => enZona(id, r)).length;
+const zoneCount = r => poolFor(r).length;
 REGIONS.forEach(([v]) => {
   const b = document.createElement("button");
   b.type = "button"; b.dataset.zone = v;
@@ -2281,6 +2294,19 @@ function closeZones() {
   return true;
 }
 $("#zoneBtn").addEventListener("click", openZones);
+if (EU) {
+  const lista = DOTS.map(id => P[id] && (id === "VA" ? "Vaticano" : P[id][0])).filter(Boolean);
+  $(".zs-peq").hidden = false;
+  $("#sinPeqTxt").textContent = "Quita " + lista.slice(0, -1).join(", ") + " y " + lista[lista.length - 1] + ". Si la partida ya ha empezado, se nota en la siguiente.";
+  $("#sinPeq").checked = sinPeq();
+  $("#sinPeq").addEventListener("change", e => {
+    store.set(KP + "sinPeq", e.target.checked);
+    $("#zoneGrid").querySelectorAll("button").forEach(b => b.querySelector(".zc").textContent = zoneCount(b.dataset.zone));
+    if (!enCurso()) newGame();
+    setTimeout(pintarMiniMapa, 50);
+    announce(e.target.checked ? "Sin países pequeños." : "Con todos los países.");
+  });
+}
 $("#setcard").addEventListener("transitionend", e => { if (e.target.id === "setcard" && e.propertyName === "transform") pintarMiniMapa(); });
 $("#tbZone").addEventListener("click", openZones);
 // Barra superior de la partida: «Inicio» vuelve a la pantalla de inicio; al lado, el modo en que estás
@@ -2609,6 +2635,7 @@ if ("serviceWorker" in navigator) {
 (function () {
   const VERSION = document.querySelector('meta[name="app-version"]').content;
   const NOVEDADES = [
+    ["4.0", ["🏝️ Nuevo en «Elige zona»: «Sin países pequeños» quita los países e islas diminutos (Andorra, Malta, las islas del Caribe y del Pacífico…), si no quieres que salgan"]],
     ["3.9", ["🌍 ¡El mundo entero! Nuevos mapas de Asia (47 países), África (54) y Oceanía (14), con capitales y banderas",
              "🗺️ Cada continente con sus regiones de la ONU como zonas para jugar",
              "🧭 Arriba eliges el mapa: España, Europa, América, Asia, África u Oceanía"]],
