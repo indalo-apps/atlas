@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="4.3.1">
+<meta name="app-version" content="4.3.2">
 <title>Atlas</title>
 <meta name="author" content="Adela Moreno Vega y Carlos Moreno Otto">
 <meta name="copyright" content="© 2026 Adela Moreno Vega y Carlos Moreno Otto. Todos los derechos reservados.">
@@ -1756,10 +1756,15 @@ function renderDue() {
   $("#m-due").disabled = !n;
   $("#dueTxt").innerHTML = n ? numify(n + (n === 1 ? " pendiente" : " pendientes") + " · " + nombre) : "Nada pendiente hoy";
 }
+// 4.3.2 · ¿Hay algo que una actualización no debe cortar? Una partida empezada o sus resultados en pantalla
+// (antes, al terminar, la versión nueva recargaba la app y se perdía la pantalla de resultados)
+window.atlasEnPartida = () => typeof S !== "undefined" && S.mode !== "explore" &&
+  (S.cur ? (S.hits + S.errors) > 0 : Object.keys(S.results || {}).length > 0);
 const pending = [];
 function later(fn, ms) { pending.push(setTimeout(fn, ms)); }
 function newGame(onlyIds) {
   if (window.atlasAplicarActualizacion) window.atlasAplicarActualizacion(); // si hay versión nueva esperando, ahora es buen momento
+  if (window.atlasNuevaPendiente && window.atlasNuevaPendiente()) return; // versión nueva publicada: se recarga ya, antes de empezar
   clearInterval(S.timer);
   pending.splice(0).forEach(clearTimeout); // lo que quedara de la partida anterior (pasar de pregunta, mensajes)
   $("#toasts").innerHTML = "";
@@ -2744,7 +2749,7 @@ if ("serviceWorker" in navigator) {
     try { reg = await navigator.serviceWorker.register("sw.js"); } catch (e) { return; }
     const habiaVersion = !!navigator.serviceWorker.controller;
     let pendiente = false;
-    const enPartida = () => typeof S !== "undefined" && S.cur && S.mode !== "explore" && (S.hits + S.errors) > 0;
+    const enPartida = () => window.atlasEnPartida(); // 4.3.2: también mientras se ven los resultados
     const recargar = () => location.reload();
     function aviso() {
       if (document.getElementById("updBar")) return;
@@ -2779,6 +2784,7 @@ if ("serviceWorker" in navigator) {
 (function () {
   const VERSION = document.querySelector('meta[name="app-version"]').content;
   const NOVEDADES = [
+    ["4.3.2", ["🛠️ Arreglado: al terminar una partida, si había una versión nueva, la app se recargaba y desaparecían los resultados. Ahora espera a que empieces otra"]],
     ["4.3.1", ["🛠️ Arreglado: en Oceanía las partidas se cortaban al empezar",
              "🛠️ Siluetas en Micronesia y Polinesia: sus islas son diminutas, así que se juega con toda Oceanía",
              "🛠️ Gentilicios con la zona Canarias: como sus provincias no tienen gentilicio propio, se juega con toda España (y te lo avisa)"]],
@@ -2854,7 +2860,7 @@ if ("serviceWorker" in navigator) {
     if (vista && IK.verCmp(VERSION, vista) > 0) setTimeout(() => verNovedades(vista), 700);
     else if (!vista && localStorage.length > 1) setTimeout(() => verNovedades("3"), 700); // ya jugaba antes de la 3.1
   } catch (e) {}
-  const enPartida = () => typeof S !== "undefined" && S.cur && S.mode !== "explore" && (S.hits + S.errors) > 0;
+  const enPartida = () => window.atlasEnPartida(); // 4.3.2: también mientras se ven los resultados
   // Comprueba también la página publicada (<meta name="app-version">) al abrir, al volver y cada 90 s
   let pend = false;
   function nueva() {
@@ -2862,6 +2868,7 @@ if ("serviceWorker" in navigator) {
     if (enPartida() || document.getElementById("ik-sheet") || (zonas && !zonas.hidden)) { pend = true; return; }
     location.replace(location.pathname + "?u=" + Date.now());
   }
+  window.atlasNuevaPendiente = () => { if (!pend) return false; pend = false; location.replace(location.pathname + "?u=" + Date.now()); return true; };
   async function comprobar() { const v = await IK.versionPublicada(); if (v && IK.verCmp(v, VERSION) > 0) nueva(); }
   setInterval(() => { const z = document.getElementById("zoneSheet"); if (pend && !enPartida() && !document.getElementById("ik-sheet") && !(z && !z.hidden)) { pend = false; nueva(); } }, 3000);
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") comprobar(); });
