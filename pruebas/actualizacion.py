@@ -2,7 +2,7 @@
 # Finge que hay una versión 99 publicada, juega una partida corta hasta el final y espera: los resultados deben seguir
 # en pantalla. Al pulsar «Jugar otra vez», la app sí debe recargarse para estrenar la versión nueva.
 # Uso: python3 -m http.server 8765 (en la carpeta de la app) y luego python3 pruebas/actualizacion.py
-import asyncio, re
+import asyncio, re, sys
 from playwright.async_api import async_playwright
 async def main():
     fallos = 0
@@ -29,6 +29,16 @@ async def main():
         await pg.click("#e-again"); await pg.wait_for_timeout(3000)
         ok2 = len(cargas) > antes
         print("Al pulsar «Jugar otra vez» se estrena la versión nueva:", "SÍ" if ok2 else "NO"); fallos += not ok2
+        # Sin partida (Explorar): la versión nueva debe entrar sola en pocos segundos
+        pg2 = await b.new_page(); c2 = []
+        pg2.on("framenavigated", lambda f: f == pg2.main_frame and c2.append(f.url))
+        await pg2.goto("http://localhost:8765/?mapa=europa"); await pg2.wait_for_timeout(1500)
+        await pg2.route(re.compile(r".*[?&]v=\d{10,}.*"), falsa)
+        await pg2.evaluate("()=>{S.mode='explore';pressMode('explore');newGame();}")
+        n0 = len(c2); await pg2.evaluate("()=>window.dispatchEvent(new Event('focus'))"); await pg2.wait_for_timeout(9000)
+        ok3 = len(c2) > n0
+        print("Sin partida, la versión nueva entra sola:", "SÍ" if ok3 else "NO"); fallos += not ok3
         await b.close()
     print("TOTAL ERRORES:", fallos)
-asyncio.run(main())
+    return fallos
+sys.exit(1 if asyncio.run(main()) else 0)

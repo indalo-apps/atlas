@@ -69,8 +69,8 @@ async def main():
                 pg.on("pageerror", lambda e: errs.append("pageerror: " + str(e)))
                 pg.on("console", lambda c: c.type == "error" and errs.append("console: " + c.text))
                 await pg.goto(f"http://localhost:8765/?mapa={m}"); await pg.wait_for_timeout(1500)
-                try: await pg.get_by_role("button", name="Entendido").click(timeout=1000)
-                except Exception: pass
+                await pg.wait_for_timeout(800)  # quien entra por primera vez no debe ver «¡La app se ha actualizado!»
+                if await pg.evaluate("()=>!!document.getElementById('ik-sheet')"): errs.append("al entrar por primera vez sale una ventana (novedades)")
                 r = await pg.evaluate(JS)
                 e = r["errores"] + errs
                 total += len(e)
@@ -80,4 +80,5 @@ async def main():
                 await pg.close()
         print("TOTAL ERRORES:", total)
         await b.close()
-asyncio.run(main())
+        return total
+sys.exit(1 if asyncio.run(main()) else 0)

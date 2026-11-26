@@ -6,11 +6,15 @@ App para aprender las provincias de España, sus capitales y comunidades jugando
 
 Se publica con GitHub Pages: https://indalo-apps.github.io/atlas/
 
-Antes de publicar, pasar la prueba `pruebas/partidas.py` (ver su cabecera): y `pruebas/actualizacion.py` (que una versión nueva no corte una partida ni sus resultados); las dos deben acabar en «TOTAL ERRORES: 0». Los mapas de continentes se generan con `herramientas/continente.js`.
+## Cómo está hecha (desde la 5.0)
+- **`src/`** son las piezas de la app: `plantilla.html`, `cuerpo.html`, `css/` y `js/` (numerados en el orden en que se cargan). **No se edita `index.html` a mano**: se construye con `node herramientas/construir.js` (y `--ver` comprueba que está al día).
+- **Cada mapa carga solo sus datos** (`src/js/cargador.js`): `espana.js` (provincias y comunidades), `europa.js`, `america.js`, `asia.js`, `africa.js` y `oceania.js`. Lo propio de cada mapa (textos, zonas, puntos, capitales…) está en su **ficha**, en `FICHAS` (`src/js/01-datos.js`).
+- **Datos de los mapas**: `herramientas/continente.js` genera Europa y los continentes (países en `herramientas/paises.js`); `herramientas/espana.js` genera `espana.js` (los ríos se conservan del archivo anterior, porque su fuente no está en npm). Necesitan `npm i world-atlas es-atlas topojson-client topojson-server topojson-simplify polygon-clipping d3-geo flag-icons`.
+- **Versión nueva**, en un paso: `node herramientas/version.js 5.0.1 "🛠️ Arreglado…" "✨ Nuevo…"` (cambia `app-version`, `CACHE` de `sw.js` y `NOVEDADES`, y reconstruye).
+- **Pruebas**: `pruebas/partidas.py` (juega todos los modos en los 7 mapas) y `pruebas/actualizacion.py` (una versión nueva no corta una partida ni sus resultados); con un servidor local `python3 -m http.server 8765`. Deben acabar en «TOTAL ERRORES: 0».
+- **Publicar**: al subir a `main`, GitHub Actions (`.github/workflows/publicar.yml`) comprueba `index.html`, pasa las dos pruebas y, solo si salen bien, publica en GitHub Pages.
 
-Para sacar una versión nueva: subir el número en `<meta name="app-version">` (index.html) y en `CACHE` (sw.js), y añadir sus novedades en `NOVEDADES`.
-
-El mapa de Europa está en `europa.js` (países, capitales y fronteras) y las banderas en `banderas/`. El de América está en `america.js`. Enlace directo a cada mapa: `?mapa=espana`, `europa`, `america`, `asia`, `africa` u `oceania` (datos en `asia.js`, `africa.js` y `oceania.js`). Los móviles que la tengan abierta se actualizan solos, sin cortar una partida a medias.
+Enlace directo a cada mapa: `?mapa=provincias`, `comunidades`, `europa`, `america`, `asia`, `africa` u `oceania`. Los móviles que la tengan abierta se actualizan solos, sin cortar una partida a medias.
 
 ## Autores
 Adela Moreno Vega y Carlos Moreno Otto.
@@ -22,7 +26,8 @@ Adela Moreno Vega y Carlos Moreno Otto.
 - Mapas de Asia, África y Oceanía: Natural Earth 1:50m (dominio público), vía world-atlas; Somalilandia dentro de Somalia; Taiwán, el Sáhara Occidental y los territorios no independientes se dibujan de fondo y no se preguntan. Regiones: geoesquema de la ONU (M49). Israel y Palestina no salen en el modo Capitales (capital en disputa). Guinea Ecuatorial: Ciudad de la Paz (capital desde enero de 2026).
 - Banderas de las provincias y comunidades de España (`banderas/es/`, en WebP): Wikimedia Commons, vía [iso3166-flag-icons](https://github.com/amckenna41/iso3166-flag-icons) de Andrew McKenna (MIT). Alicante, Castellón, Valencia y A Coruña no tienen bandera provincial y no se preguntan; algunas provincias usan la bandera de su diputación.
 - Regiones de Europa: geoesquema de la ONU (M49); Chipre, en Europa del Sur.
-- Banderas: [flag-icons](https://github.com/lipis/flag-icons) de Panayiotis Lipiridis, licencia MIT (`banderas/LICENSE-flag-icons.txt`).
+- Mapa de España: [es-atlas](https://github.com/martgnz/es-atlas) (IGN); países vecinos y ríos, Natural Earth.
+- Banderas: [flag-icons](https://github.com/lipis/flag-icons) de Panayiotis Lipiridis, licencia MIT (`banderas/LICENSE-flag-icons.txt`); las 16 con escudo detallado, convertidas a WebP para que pesen menos.
 
 ## Licencia
 Todos los derechos reservados. Se permite usar la app publicada con fines personales y educativos; no se permite copiar, modificar ni distribuir el código o los contenidos sin autorización de los autores. Texto completo en [LICENSE](LICENSE).

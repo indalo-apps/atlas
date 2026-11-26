@@ -1,0 +1,47 @@
+# Cada vez que se sube algo a main: comprueba que index.html está al día con src/, juega todas las partidas
+# de prueba y, solo si todo sale bien, publica la app en GitHub Pages.
+name: Probar y publicar
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  probar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: index.html al día con src/
+        run: node herramientas/construir.js --ver
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Instalar Playwright
+        run: pip install playwright && python -m playwright install --with-deps chromium
+      - name: Servidor local
+        run: (python -m http.server 8765 >/dev/null 2>&1 &) && sleep 2
+      - name: Partidas en los 7 mapas
+        run: python pruebas/partidas.py
+      - name: Avisos de versión nueva
+        run: python pruebas/actualizacion.py
+  publicar:
+    needs: probar
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.despliegue.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Quitar lo que no hace falta en la web
+        run: rm -rf src herramientas pruebas .github
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: . }
+      - id: despliegue
+        uses: actions/deploy-pages@v4

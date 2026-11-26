@@ -1,0 +1,241 @@
+
+<div class="app">
+  <nav class="topbar" id="topbar" aria-label="Menú">
+    <button type="button" class="tb-zone" id="tbZone" aria-haspopup="dialog" aria-label="Zona: Toda España. Cambiar de zona"><svg class="zb-pin" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-6.2-6.5-11.2a6.5 6.5 0 0 1 13 0C18.5 14.8 12 21 12 21z"/><circle cx="12" cy="9.8" r="2.3"/></svg><b id="tbZoneName">Toda España</b><svg class="tb-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></button>
+    <span class="tb-mode" id="tbMode" aria-live="polite"></span>
+    <button type="button" class="tb-restart" id="tbRestart" aria-label="Empezar de nuevo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4.5v4h4"/></svg></button>
+    <button type="button" class="tb-home" id="tbHome" aria-label="Inicio: elegir modo o zona"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11.5L12 4.5l8 7"/><path d="M6.5 10v9.5h11V10"/><path d="M10 19.5v-5h4v5"/></svg><span>Inicio</span></button>
+  </nav>
+  <section class="mapwrap" aria-label="Mapa de España">
+    <div class="maphead">
+      <h1 class="brand">Atlas · Provincias<small><span class="num">50</span> provincias y <span class="num">2</span> ciudades autónomas</small></h1>
+      <div class="scale" id="regionLabel">España</div>
+    </div>
+    <div class="mapstage" id="stage">
+      <svg id="map" viewBox="0 0 960 600" tabindex="0" role="application" aria-roledescription="mapa"
+        aria-label="Mapa de provincias. Flechas para moverte entre provincias, Intro para elegir, más y menos para acercar o alejar."></svg>
+      <div class="toasts" id="toasts" aria-hidden="true"></div>
+      <div class="shapebox flagbox" id="flagbox" hidden>
+        <img id="flagImg" src="data:," alt="">
+        <p>¿De qué país es esta bandera?</p>
+      </div>
+      <div class="shapebox" id="shapebox" hidden>
+        <svg id="shapeSvg" role="img" aria-label="Silueta de una provincia"><path id="shapePath"></path></svg>
+        <p>¿Qué provincia tiene esta forma?</p>
+      </div>
+      <div class="chip onmap mobile-only" id="regionChip" aria-hidden="true">España</div>
+      <button class="iconbtn onmap mobile-only" id="openSettings" aria-label="Menú" aria-haspopup="dialog">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+      </button>
+      <div class="zoomctl" role="group" aria-label="Zoom del mapa">
+        <button id="z-in" aria-label="Acercar" title="Acercar (+)">+</button>
+        <button id="z-out" aria-label="Alejar" title="Alejar (−)" disabled>−</button>
+        <button id="z-reset" aria-label="Ver el mapa completo" title="Ver todo (0)" disabled>⤢</button>
+      </div>
+      <div class="legend" id="legend" hidden>
+        <span class="sw-ok">A la primera</span>
+        <span class="sw-meh">Con algún fallo</span>
+        <span class="sw-bad">Para repasar</span>
+      </div>
+    </div>
+    <p class="keyhelp"><span class="kh-mouse">Ctrl o ⌘ + rueda para acercar, arrastra para moverte. Teclado: Tab hasta el mapa, flechas e Intro.</span><span class="kh-touch">Pellizca con dos dedos para acercar; con zoom, arrastra para moverte.</span></p>
+  </section>
+
+  <aside class="panel">
+    <div class="card" id="setcard" role="dialog" aria-labelledby="setTitle">
+      <div class="sheet-head">
+        <h2 id="setTitle">¿Qué quieres hacer?</h2>
+        <button class="iconbtn mobile-only" id="sheetClose" aria-label="Cerrar el menú">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+      <div class="homebar">
+      <div class="mapseg" role="group" aria-label="Mapa">
+        <button type="button" data-mapa="es" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>España</button>
+        <button type="button" data-mapa="eu" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Europa</button>
+        <button type="button" data-mapa="am" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>América</button>
+        <button type="button" data-mapa="as" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Asia</button>
+        <button type="button" data-mapa="af" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>África</button>
+        <button type="button" data-mapa="oc" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Oceanía</button>
+      </div>
+      <div class="mapseg mapsub" role="group" aria-label="España por provincias o por comunidades" hidden>
+        <button type="button" data-sub="es" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Provincias</button>
+        <button type="button" data-sub="ca" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Comunidades</button>
+      </div>
+      <button type="button" class="zonebtn" id="zoneBtn" aria-haspopup="dialog">
+        <svg class="zb-pin" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-6.2-6.5-11.2a6.5 6.5 0 0 1 13 0C18.5 14.8 12 21 12 21z"/><circle cx="12" cy="9.8" r="2.3"/></svg>
+        <span class="zb-txt"><small>Zona</small><b id="zoneName">Toda España</b></span>
+        <span class="zb-go">Cambiar<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></span>
+      </button>
+      <div class="seg" role="tablist" aria-label="¿Qué quieres hacer?">
+        <button type="button" role="tab" id="tab-aprender" data-tab="aprender" aria-controls="grp-aprender" aria-selected="false" tabindex="-1">Aprender</button>
+        <button type="button" role="tab" id="tab-practicar" data-tab="practicar" aria-controls="grp-practicar" aria-selected="true">Practicar</button>
+        <button type="button" role="tab" id="tab-jugar" data-tab="jugar" aria-controls="grp-jugar" aria-selected="false" tabindex="-1">Jugar</button>
+      </div>
+      </div>
+      <button type="button" class="resume" id="resumeCard" hidden>
+        <span class="rs-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg></span>
+        <span class="rs-txt"><b>Seguir con tu partida</b><span id="resumeTxt"></span><i class="rs-bar"><i id="resumeBar"></i></i></span>
+      </button>
+      <button type="button" class="linkbtn" id="restartLink" hidden>Empezar de nuevo</button>
+      <div class="minimap" id="miniMap" aria-hidden="true"></div>
+      <div class="grp" id="grp-aprender" role="tabpanel" aria-labelledby="tab-aprender" hidden>
+      <div class="modes" role="group" aria-label="Aprender">
+        <button id="m-explore" data-mode="explore" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.2 15.2L20.5 20.5"/></svg><b>Explorar</b><span>Sin preguntas</span></button>
+        <button id="m-due" class="duecard" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4M8.5 15l2.3 2.3 4.7-4.6"/></svg><b>Repaso del día</b><span id="dueTxt">Nada pendiente hoy</span></button>
+      </div>
+      </div>
+      <div class="grp" id="grp-practicar" role="tabpanel" aria-labelledby="tab-practicar">
+      <div class="modes" role="group" aria-label="Practicar">
+        <button id="m-find" data-mode="find" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5"/></svg><b>Encuéntrala</b><span>Toca la provincia</span></button>
+        <button id="m-name" data-mode="name" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.3 9.3a2.8 2.8 0 0 1 5.4 1c0 1.9-2.7 2.3-2.7 4.2"/><path d="M12 17.3v.2"/></svg><b>¿Cuál es?</b><span>Elige el nombre</span></button>
+        <button id="m-cap" data-mode="cap" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.2 6-5.5-3-5.5 3 1.2-6-4.5-4.2 6.1-.8z"/></svg><b>Capitales</b><span>Busca la capital</span></button>
+        <button id="m-gent" data-mode="gent" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 19.5c.6-3 2.7-4.8 5.5-4.8s4.9 1.8 5.5 4.8"/><circle cx="16.8" cy="9.3" r="2.3"/><path d="M15.8 14.8c2.4-.2 4.2 1.3 4.7 4"/></svg><b>Gentilicios</b><span>Por el gentilicio</span></button>
+        <button id="m-shape" data-mode="shape" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 8l3.8-3.5 3.4 2 3.8-1.4 2.8 3.7-1.4 3.7 1.9 3.4-4.2 2.9-3.3-1-3.8 1.9-2.8-3.3.5-3.8z"/></svg><b>Siluetas</b><span>Reconoce la forma</span></button>
+        <button id="m-flag" data-mode="flag" aria-pressed="false" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4.5c4-2 6 2 10 0s4 0 4 0v9s-1.5-1.5-4 0-6-2-10 0"/></svg><b>Banderas</b><span>¿De qué país es?</span></button>
+      </div>
+      </div>
+      <div class="grp" id="grp-jugar" role="tabpanel" aria-labelledby="tab-jugar" hidden>
+      <div class="modes" role="group" aria-label="Jugar">
+        <button id="m-time" data-mode="time" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13.5" r="7"/><path d="M12 13.5V10M9.5 3h5M12 3v3.5M18 7.5l1.5-1.5"/></svg><b>Contrarreloj</b><span><span class="num">60</span> segundos</span></button>
+        <button id="m-duel" data-mode="duel" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 4.5l8 8M19.5 4.5l-8 8"/><path d="M7 17l-3 3M17 17l3 3M5 14.5l4.5 4.5M19 14.5L14.5 19"/></svg><b>Duelo</b><span>Dos jugadores</span></button>
+      </div>
+      </div>
+      <div class="modeopts" id="modeOpts">
+        <p class="eyebrow" id="optsTitle">Opciones</p>
+        <label class="field" for="region" id="regionRow" hidden>Zona
+          <select id="region"></select>
+        </label>
+        <div class="duelnames" id="duelRow" hidden>
+          <label for="p1n">Jugador 1<input id="p1n" maxlength="14" autocomplete="off" placeholder="Jugador 1"></label>
+          <label for="p2n">Jugador 2<input id="p2n" maxlength="14" autocomplete="off" placeholder="Jugador 2"></label>
+          <button type="button" class="btn primary mobile-only" id="duelGo">Empezar duelo</button>
+        </div>
+        <label class="check" id="flagCaRow" for="flagCa" hidden>
+          <input type="checkbox" id="flagCa">
+          <span>Banderas de las comunidades autónomas<small>En lugar de las de las provincias</small></span>
+        </label>
+        <label class="check" id="capOnlyRow" for="capOnly" hidden>
+          <input type="checkbox" id="capOnly" checked>
+          <span>Solo capitales con nombre distinto<small id="capOnlyTxt">Oviedo, Santander, Bilbao, San Sebastián, Vitoria-Gasteiz, Pamplona, Logroño y Palma</small></span>
+        </label>
+      </div>
+      <div class="row mobile-only" hidden>
+        <button class="btn ghost" id="restart2">Empezar de nuevo</button>
+        <button class="btn primary wide" id="sheetPlay">Jugar</button>
+      </div>
+      <div class="menufoot">
+        <button class="soundbtn" id="sound" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path class="wave" d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/><path class="mute" d="M16 9.5l5 5M21 9.5l-5 5"/></svg><span id="soundTxt">Sonido</span></button>
+        <button type="button" class="verbtn" id="verLine">⚙︎ Ajustes · Versión <span id="verNum"></span></button>
+      </div>
+    </div>
+
+    <div class="card question" id="qcard">
+      <div class="turn" id="turn" hidden></div>
+      <div class="clock" id="clock" hidden role="timer" aria-label="Segundos que quedan"><span id="clockN">60</span><small>s</small></div>
+      <div class="streak" id="streak" hidden aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 2c.6 3.2-1.4 5-3 6.9C7.3 10.8 6 12.7 6 15a6 6 0 0 0 12 0c0-2.4-1.1-4.2-2.3-5.6-.3 1.4-1 2.5-2.2 3 .4-3.6-.4-7.6-1.5-10.4Z"/></svg>
+        <span id="streakN">0</span>
+      </div>
+      <p class="prompt" id="prompt">Encuentra en el mapa</p>
+      <p class="target-name" id="target">…</p>
+      <p class="subname" id="sub"></p>
+      <div class="options" id="options" hidden></div>
+      <p class="feedback" id="feedback" aria-live="polite"></p>
+      <div class="row">
+        <button class="btn ghost" id="skip">Ver respuesta</button>
+        <button class="btn ghost" id="restart">Empezar de nuevo</button>
+      </div>
+    </div>
+
+    <div class="card info" id="infocard" hidden>
+      <p class="eyebrow" id="i-eyebrow">Provincia</p>
+      <img class="iflag" id="i-flag" src="data:," alt="" hidden>
+      <p class="ifnote" id="i-fnote" hidden></p>
+      <p class="target-name" id="i-name">Toca una provincia</p>
+      <dl>
+        <dt>Capital</dt><dd id="i-cap">—</dd>
+        <dt id="i-ccaa-l">Comunidad</dt><dd id="i-ccaa">—</dd>
+      </dl>
+      <p class="note">Pasa el ratón o toca el mapa para ver cada provincia. Cuando te sientas preparado, elige un modo de juego.</p>
+    </div>
+
+    <div class="card end" id="endcard" hidden role="dialog" aria-labelledby="e-title">
+      <p class="eyebrow">Partida terminada</p>
+      <h2 id="e-title">¡Bien hecho!</h2>
+      <div class="bigscore"><b id="e-score">0</b><span>puntos</span></div>
+      <div class="tally" role="list" aria-label="Resultado por provincias">
+        <div class="tile ok" role="listitem"><b id="t-ok">0</b><span id="t-ok-l">Aciertos</span></div>
+        <div class="tile bad" role="listitem"><b id="t-bad">0</b><span id="t-bad-l">Errores</span></div>
+      </div>
+      <p id="e-summary"></p>
+      <p id="e-best"></p>
+      <div class="fails" id="e-fails"></div>
+      <div class="row">
+        <button class="btn primary" id="e-review">Repasar fallos</button>
+        <button class="btn" id="e-again">Jugar otra vez</button>
+        <button class="btn" id="e-share">Compartir</button>
+        <button class="btn ghost mobile-only" id="e-map">Ver mapa</button>
+      </div>
+    </div>
+
+    <div class="card" id="statcard">
+      <div class="progress" id="progress" role="progressbar" aria-label="Progreso de la partida" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="bar"></i></div>
+      <div class="stats">
+        <div class="stat"><b id="s-done">0/0</b><span id="s-done-l">Hechas</span></div>
+        <div class="stat"><b id="s-score">0</b><span id="s-score-l">Puntos</span></div>
+        <div class="stat"><b id="s-streak">0</b><span id="s-streak-l">Racha</span></div>
+      </div>
+      <div class="barrow mobile-only" id="barrow">
+        <button class="btn ghost wide" id="skip2">Ver respuesta</button>
+        <button class="btn ghost" id="openSettings2">Menú</button>
+      </div>
+    </div>
+  </aside>
+</div>
+<div class="backdrop" id="backdrop" hidden></div>
+<div class="zbackdrop" id="zoneBackdrop" hidden></div>
+<div class="zonesheet" id="zoneSheet" role="dialog" aria-modal="true" aria-labelledby="zsTitle" hidden>
+  <div class="sheet-head">
+    <h2 id="zsTitle">Elige zona</h2>
+    <button class="iconbtn" id="zoneClose" aria-label="Cerrar">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <div class="mapseg" role="group" aria-label="Mapa (en la ventana de zonas)">
+        <button type="button" data-mapa="es" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>España</button>
+        <button type="button" data-mapa="eu" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Europa</button>
+        <button type="button" data-mapa="am" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>América</button>
+        <button type="button" data-mapa="as" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Asia</button>
+        <button type="button" data-mapa="af" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>África</button>
+        <button type="button" data-mapa="oc" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Oceanía</button>
+      </div>
+      <div class="mapseg mapsub" role="group" aria-label="España por provincias o por comunidades" hidden>
+        <button type="button" data-sub="es" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Provincias</button>
+        <button type="button" data-sub="ca" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Comunidades</button>
+      </div>
+      <p class="zs-note">Vale para todos los modos y se recuerda para la próxima vez. El número es cuántas provincias tiene.</p>
+      <label class="check zs-peq" for="sinPeq" hidden>
+        <input type="checkbox" id="sinPeq">
+        <span>Sin países pequeños<small id="sinPeqTxt"></small></span>
+      </label>
+  <div class="zs-grid" id="zoneGrid" role="group" aria-label="Zonas"></div>
+  <div class="zs-confirm" id="zoneConfirm" role="alertdialog" aria-labelledby="zcTxt" hidden>
+    <p id="zcTxt"></p>
+    <div class="row"><button class="btn ghost" id="zcNo">Seguir aquí</button><button class="btn primary wide" id="zcYes">Empezar de nuevo</button></div>
+  </div>
+  <button class="btn primary wide" id="zoneDone">Listo</button>
+</div>
+<div class="modal" id="shareModal" hidden role="dialog" aria-label="Imagen del resultado">
+  <div class="modal-box">
+    <img id="shareImg" alt="Mapa con el resultado de la partida">
+    <p class="note">Mantén pulsada la imagen para guardarla o enviarla.</p>
+    <div class="row">
+      <a class="btn primary" id="shareDl" download="atlas.png" href="#">Descargar</a>
+      <button class="btn" id="shareClose">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="sr-only" id="announce" aria-live="polite" aria-atomic="true"></div>
+
