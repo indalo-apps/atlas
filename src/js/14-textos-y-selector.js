@@ -44,7 +44,10 @@ document.querySelectorAll(".mapsub button").forEach(b => {
 if (!EU) store.set("atlas:espana", MAPA);
 function cambiarMapa(m) {
   if (m === MAPA) return;
-  const ir = () => { store.set("atlas:mapa", m); location.replace(location.pathname); };
+  const ir = () => { // 5.1.1 · se recuerda por dónde ibas en la portada, para que al recargar no salte arriba
+    try { sessionStorage.setItem("atlas:scroll", String($("#setcard").scrollTop)); } catch (e) {}
+    store.set("atlas:mapa", m); location.replace(location.pathname);
+  };
   if (!enCurso()) return ir();
   IK.hoja(`<div class="aj"><h2>¿Cambiar a ${{ eu: "Europa", am: "América", as: "Asia", af: "África", oc: "Oceanía", es: "las provincias de España", ca: "las comunidades de España" }[m]}?</h2><p>Perderás lo que llevas en esta partida. Tus récords y tu repaso de cada mapa se guardan aparte.</p>
     <div class="ajrow"><button class="ik-btn ik-ghost" data-ik="cerrar">Seguir jugando</button><button class="ik-btn" id="mapaYes">Cambiar de mapa</button></div></div>`, "Cambiar de mapa");
@@ -64,4 +67,11 @@ if (!savedMode) { S.mode = "explore"; pressMode("explore"); }
 renderModeExtras();
 newGame();
 // En el móvil en vertical la app se abre siempre en la pantalla de inicio; en el resto, solo la primera vez
+// 5.1.1 · Al abrir la app (y al cambiar de mapa, que recarga), la portada ya está puesta: sin subir desde abajo
+document.body.classList.add("arranque");
 if (mqHome.matches || (!savedMode && mqMobile.matches)) openSheet(true);
+try {
+  const y = +sessionStorage.getItem("atlas:scroll"); sessionStorage.removeItem("atlas:scroll");
+  if (y) $("#setcard").scrollTop = y;
+} catch (e) {}
+requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.remove("arranque")));

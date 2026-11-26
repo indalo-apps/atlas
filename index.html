@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="5.1">
+<meta name="app-version" content="5.1.1">
 <title>Atlas</title>
 <meta name="author" content="Adela Moreno Vega y Carlos Moreno Otto">
 <meta name="copyright" content="© 2026 Adela Moreno Vega y Carlos Moreno Otto. Todos los derechos reservados.">
@@ -581,6 +581,7 @@ button.minimap:focus-visible { outline: 2.5px solid var(--accent); outline-offse
 .cuenta[hidden] { display: none; }
 .cuenta b { font: 800 5.5rem/1 var(--f-display); color: var(--ink); }
 .cuenta span { font: 700 1.1rem/1 var(--f-body); color: var(--ink); }
+body.arranque #setcard { transition: none !important; } /* 5.1.1 · al abrir, la portada no sube desde abajo */
 </style>
 <style>
 /* ===== Kit común: ayuda para instalar y aviso amarillo ===== */
@@ -2823,7 +2824,10 @@ document.querySelectorAll(".mapsub button").forEach(b => {
 if (!EU) store.set("atlas:espana", MAPA);
 function cambiarMapa(m) {
   if (m === MAPA) return;
-  const ir = () => { store.set("atlas:mapa", m); location.replace(location.pathname); };
+  const ir = () => { // 5.1.1 · se recuerda por dónde ibas en la portada, para que al recargar no salte arriba
+    try { sessionStorage.setItem("atlas:scroll", String($("#setcard").scrollTop)); } catch (e) {}
+    store.set("atlas:mapa", m); location.replace(location.pathname);
+  };
   if (!enCurso()) return ir();
   IK.hoja(`<div class="aj"><h2>¿Cambiar a ${{ eu: "Europa", am: "América", as: "Asia", af: "África", oc: "Oceanía", es: "las provincias de España", ca: "las comunidades de España" }[m]}?</h2><p>Perderás lo que llevas en esta partida. Tus récords y tu repaso de cada mapa se guardan aparte.</p>
     <div class="ajrow"><button class="ik-btn ik-ghost" data-ik="cerrar">Seguir jugando</button><button class="ik-btn" id="mapaYes">Cambiar de mapa</button></div></div>`, "Cambiar de mapa");
@@ -2843,7 +2847,14 @@ if (!savedMode) { S.mode = "explore"; pressMode("explore"); }
 renderModeExtras();
 newGame();
 // En el móvil en vertical la app se abre siempre en la pantalla de inicio; en el resto, solo la primera vez
+// 5.1.1 · Al abrir la app (y al cambiar de mapa, que recarga), la portada ya está puesta: sin subir desde abajo
+document.body.classList.add("arranque");
 if (mqHome.matches || (!savedMode && mqMobile.matches)) openSheet(true);
+try {
+  const y = +sessionStorage.getItem("atlas:scroll"); sessionStorage.removeItem("atlas:scroll");
+  if (y) $("#setcard").scrollTop = y;
+} catch (e) {}
+requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.remove("arranque")));
 </script>
 
 <script>
@@ -2897,6 +2908,7 @@ if (mqHome.matches || (!savedMode && mqMobile.matches)) openSheet(true);
 (function () {
   const VERSION = document.querySelector('meta[name="app-version"]').content;
   const NOVEDADES = [
+    ["5.1.1", ["🛠️ Al cambiar de mapa la pantalla ya no salta: la portada se queda donde estabas"]],
     ["5.1", ["▶️ Botón grande «Empezar a jugar» en la portada",
              "📋 Una sola lista de juegos, de fácil a difícil, con cuántas preguntas tiene cada uno",
              "💡 «Cómo se juega», con un ejemplo, las primeras veces de cada juego; y 3, 2, 1 antes de Contrarreloj",

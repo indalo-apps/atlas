@@ -2,6 +2,7 @@
 (function () {
   const VERSION = document.querySelector('meta[name="app-version"]').content;
   const NOVEDADES = [
+    ["5.1.1", ["🛠️ Al cambiar de mapa la pantalla ya no salta: la portada se queda donde estabas"]],
     ["5.1", ["▶️ Botón grande «Empezar a jugar» en la portada",
              "📋 Una sola lista de juegos, de fácil a difícil, con cuántas preguntas tiene cada uno",
              "💡 «Cómo se juega», con un ejemplo, las primeras veces de cada juego; y 3, 2, 1 antes de Contrarreloj",

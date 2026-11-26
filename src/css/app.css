@@ -547,3 +547,4 @@ button.minimap:focus-visible { outline: 2.5px solid var(--accent); outline-offse
 .cuenta[hidden] { display: none; }
 .cuenta b { font: 800 5.5rem/1 var(--f-display); color: var(--ink); }
 .cuenta span { font: 700 1.1rem/1 var(--f-body); color: var(--ink); }
+body.arranque #setcard { transition: none !important; } /* 5.1.1 · al abrir, la portada no sube desde abajo */

@@ -1,7 +1,7 @@
 // © 2026 Adela Moreno Vega y Carlos Moreno Otto. Todos los derechos reservados.
 // Service worker del Atlas: guarda el juego para usarlo sin conexión.
 // Al subir una versión nueva, cambia el nombre de la caché y se borra la anterior.
-const CACHE = "atlas-v5.1-20261126";
+const CACHE = "atlas-v5.1.1-20261126";
 const ARCHIVOS = [
   "./",
   "index.html",
