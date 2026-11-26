@@ -22,7 +22,7 @@ function dueIds(modo = ultimaPractica) {
 }
 function renderDue() {
   const n = dueIds().length, nombre = $("#m-" + ultimaPractica).querySelector("b").textContent;
-  $("#m-due").disabled = !n;
+  $("#m-due").disabled = !n; $("#m-due").hidden = !n; // 5.1 · solo se ve cuando hay algo que repasar
   $("#dueTxt").innerHTML = n ? numify(n + (n === 1 ? " pendiente" : " pendientes") + " · " + nombre) : "Nada pendiente hoy";
 }
 // 4.3.2 · ¿Hay algo que una actualización no debe cortar? Una partida empezada o sus resultados en pantalla
@@ -31,39 +31,46 @@ window.atlasEnPartida = () => typeof S !== "undefined" && S.mode !== "explore" &
   (S.cur ? (S.hits + S.errors) > 0 : Object.keys(S.results || {}).length > 0);
 const pending = [];
 function later(fn, ms) { pending.push(setTimeout(fn, ms)); }
+// 5.1 · Las preguntas de un juego en la zona elegida (también sirve para decir cuántas son antes de empezar)
+function preguntasDe(modo, onlyIds) {
+  let pool = poolFor(S.region), base = (onlyIds || pool).slice(), capAviso = false, gentAviso = false, shapeAviso = false;
+  if (modo === "gent") { // Las dos provincias de Canarias no tienen gentilicio propio: esa zona se juega con toda España
+    const conG = id => (CA ? GENT_CA : GENT)[id], g = base.filter(conG);
+    if (g.length) base = g; else { base = ALL.filter(conG); pool = base.slice(); gentAviso = true; }
+  }
+  if (modo === "shape" && NO_SHAPE.length) { // islas diminutas: sin silueta; si la zona solo tiene de esas, se juega con todo el mapa
+    const b2 = base.filter(id => !NO_SHAPE.includes(id));
+    if (b2.length) base = b2; else if (!onlyIds) { base = ALL.filter(id => !NO_SHAPE.includes(id)); pool = base.slice(); shapeAviso = true; }
+  }
+  if (modo === "duel") { // 10 rondas por jugador como mucho, alternando turnos
+    const rondas = Math.max(1, Math.min(10, Math.floor(base.length / 2)));
+    base = shuffle(base).slice(0, rondas * 2);
+    if (base.length < rondas * 2) base = base.concat(shuffle(ALL.filter(id => pool.includes(id))).slice(0, rondas * 2 - base.length));
+  }
+  if (modo === "flag" && !EU) {
+    if (CA) {} else if (flagCa()) { // una provincia por comunidad (la que haga de comunidad en la pregunta)
+      const vistas = {}; base = shuffle(base).filter(id => !vistas[P[id][3]] && (vistas[P[id][3]] = true));
+    } else { const b2 = base.filter(id => !SIN_BANDERA.includes(id) && !NO_SE_PREGUNTA.includes(id)); if (b2.length) base = b2; }
+  }
+  if (modo === "cap" && M.sinCap) { const b2 = base.filter(id => !M.sinCap.includes(id)); if (b2.length) base = b2; } // capitales en disputa: no se preguntan
+  if (modo === "cap" && capOnly() && !onlyIds) {
+    const distintas = base.filter(id => M.capIgual ? !M.capIgual.includes(id) : !P[id][2].startsWith(P[id][0]));
+    if (distintas.length) base = distintas; else capAviso = true;
+  }
+  return { pool, base, capAviso, gentAviso, shapeAviso };
+}
 function newGame(onlyIds) {
   if (window.atlasActualizarSiToca && window.atlasActualizarSiToca()) return; // versión nueva esperando: se estrena ya, antes de empezar
   clearInterval(S.timer);
   pending.splice(0).forEach(clearTimeout); // lo que quedara de la partida anterior (pasar de pregunta, mensajes)
   $("#toasts").innerHTML = "";
   clearMarks();
-  S.pool = poolFor(S.region);
-  let base = (onlyIds || S.pool).slice(), capAviso = false, gentAviso = false, shapeAviso = false;
-  if (S.mode === "gent") { // Las dos provincias de Canarias no tienen gentilicio propio: esa zona se juega con toda España
-    const conG = id => (CA ? GENT_CA : GENT)[id], g = base.filter(conG);
-    if (g.length) base = g; else { base = ALL.filter(conG); S.pool = base.slice(); gentAviso = true; }
-  }
-  if (S.mode === "shape" && NO_SHAPE.length) { // islas diminutas: sin silueta; si la zona solo tiene de esas, se juega con todo el mapa
-    const b2 = base.filter(id => !NO_SHAPE.includes(id));
-    if (b2.length) base = b2; else if (!onlyIds) { base = ALL.filter(id => !NO_SHAPE.includes(id)); S.pool = base.slice(); shapeAviso = true; }
-  }
-  if (S.mode === "duel") { // 10 rondas por jugador como mucho, alternando turnos
-    S.rounds = Math.max(1, Math.min(10, Math.floor(base.length / 2)));
-    base = shuffle(base).slice(0, S.rounds * 2);
-    if (base.length < S.rounds * 2) base = base.concat(shuffle(ALL.filter(id => S.pool.includes(id))).slice(0, S.rounds * 2 - base.length));
-  }
-  if (S.mode === "flag" && !EU) {
-    if (CA) {} else if (flagCa()) { // una provincia por comunidad (la que haga de comunidad en la pregunta)
-      const vistas = {}; base = shuffle(base).filter(id => !vistas[P[id][3]] && (vistas[P[id][3]] = true));
-    } else { const b2 = base.filter(id => !SIN_BANDERA.includes(id) && !NO_SE_PREGUNTA.includes(id)); if (b2.length) base = b2; }
-  }
-  if (S.mode === "cap" && M.sinCap) { const b2 = base.filter(id => !M.sinCap.includes(id)); if (b2.length) base = b2; } // capitales en disputa: no se preguntan
-  if (S.mode === "cap" && capOnly() && !onlyIds) {
-    const distintas = base.filter(id => M.capIgual ? !M.capIgual.includes(id) : !P[id][2].startsWith(P[id][0]));
-    if (distintas.length) base = distintas; else capAviso = true;
-  }
+  const q = preguntasDe(S.mode, onlyIds);
+  S.pool = q.pool; let base = q.base;
+  const { capAviso, gentAviso, shapeAviso } = q;
   S.queue = shuffle(base);
-  S.total = S.queue.length;
+  S.total = S.n0 = S.queue.length;
+  if (S.mode === "duel") S.rounds = Math.max(1, Math.round(S.total / 2));
   S.pts = [0, 0]; S.turn = 0; S.qn = 0;
   provAll.classed("p1 p2", false); $("#shapebox").hidden = true; $("#flagbox").hidden = true;
   S.results = {}; S.requeued = {}; S.errors = 0; S.hits = 0; S.score = 0; S.streak = 0; S.best = 0; S.cur = null; S.review = !!onlyIds;
@@ -74,6 +81,7 @@ function newGame(onlyIds) {
   $("#qcard").hidden = explore; $("#statcard").hidden = explore; $("#infocard").hidden = !explore;
   document.body.classList.toggle("mode-explore", explore);
   if (typeof onResize === "function") onResize();
+  if (typeof renderCuantas === "function") renderCuantas();
   if (explore) { $("#i-name").textContent = tx("Toca una provincia", "Toca un país"); $("#i-cap").textContent = "—"; $("#i-ccaa").textContent = "—"; $("#i-flag").hidden = true; $("#i-fnote").hidden = true; return; }
   S.t0 = Date.now();
   const timed = S.mode === "time";
@@ -85,11 +93,9 @@ function newGame(onlyIds) {
   $("#skip").textContent = $("#skip2").textContent = timed ? "Saltar" : duel ? "Pasar" : "Ver respuesta";
   $(".bigscore").hidden = duel; $("#e-share").hidden = duel;
   $("#t-ok").parentNode.classList.toggle("duel1", duel); $("#t-bad").parentNode.classList.toggle("duel2", duel);
-  if (timed) {
-    S.tEnd = Date.now() + TIEMPO;
-    S.timer = setInterval(tickClock, 200); tickClock();
-  }
-  next();
+  if (timed) cuentaAtras(); // 5 · 3, 2, 1 antes de que empiece a correr el reloj
+  else next();
+  explicar();
   if (shapeAviso) toast(null, "Las islas de esta zona son tan pequeñas que no tienen silueta: juegas con todo el mapa", "warn", 3600);
   if (gentAviso) toast(null, "Las provincias de Canarias no tienen gentilicio propio: juegas con toda España", "warn", 3600);
   if (capAviso) toast(null, tx("En esta zona todas las capitales se llaman como su provincia", "En esta zona todas las capitales se llaman como su país"), "warn", 3200);
@@ -162,13 +168,13 @@ function next() {
   if (S.mode !== "duel") $("#target").style.background = "";
   const tg = $("#target"); tg.classList.remove("swap"); void tg.offsetWidth; tg.classList.add("swap");
   $("#skip2").textContent = S.mode === "time" ? "Saltar" : S.mode === "duel" ? "Pasar" : "Ver respuesta";
-  const n = S.total - S.queue.length;
+  const n = hechas() + 1;
   if (S.mode === "time") { announce("Encuentra " + nm); renderStats(); return; }
   if (S.mode === "duel") { announce("Turno de " + jug(S.turn) + ". Encuentra " + nm); renderStats(); return; }
   if (S.mode === "gent") { announce("¿Dónde viven los " + S.gentTxt + "?"); renderStats(); return; }
   if (S.mode === "shape") { announce(tx("¿Qué provincia", "¿Qué país") + " tiene esta forma? Opciones con las teclas 1 a 4."); renderStats(); return; }
   if (S.mode === "flag") { announce($("#prompt").textContent + " Bandera " + bandera(S.cur) + ". Opciones con las teclas 1 a 4."); renderStats(); return; }
-  announce("Pregunta " + n + " de " + S.total + ". " + (S.mode === "find" ? "Encuentra " + nm :
+  announce("Pregunta " + Math.min(n, S.n0) + " de " + S.n0 + ". " + (S.mode === "find" ? "Encuentra " + nm :
     S.mode === "cap" ? tx("¿En qué provincia está ", "¿En qué país está ") + cap + "?" : tx("¿Qué provincia está marcada?", "¿Qué país está marcado?") + " Opciones con las teclas 1 a 4."));
   renderStats();
 }
@@ -218,6 +224,50 @@ function hintRegion() {
 }
 
 const TIEMPO = 60000;
+// 5.1 · Contrarreloj: cuenta atrás de 3 segundos; el reloj y la primera pregunta llegan después
+function cuentaAtras() {
+  S.locked = true; S.cur = null;
+  $("#clockN").textContent = TIEMPO / 1000; $("#clock").classList.remove("low"); $("#bar").style.width = "100%";
+  $("#prompt").textContent = "Prepárate"; $("#target").textContent = "3"; $("#sub").textContent = "";
+  $("#s-done").textContent = "0"; $("#s-score").textContent = "0"; $("#s-streak").textContent = "0";
+  const pon = n => { $("#cuentaN").textContent = n; $("#target").textContent = n; announce(String(n)); };
+  $("#cuenta").hidden = false; pon(3);
+  later(() => pon(2), 1000); later(() => pon(1), 2000); later(empezarReloj, 3000);
+}
+function empezarReloj() {
+  $("#cuenta").hidden = true;
+  S.tEnd = Date.now() + TIEMPO;
+  clearInterval(S.timer); S.timer = setInterval(tickClock, 200); tickClock();
+  next();
+}
+// 5.1 · «Cómo se juega», con un ejemplo de la propia partida: las tres primeras veces de cada juego, hasta la primera respuesta
+function explicar() {
+  const k = "atlas:howto:" + S.mode, veces = store.get(k) || 0, el = $("#howto");
+  el.hidden = true;
+  if (S.mode === "explore" || veces >= 3) return;
+  const lo = U.art === "el" ? "lo" : "la", cur = S.cur && P[S.cur];
+  const t = {
+    find: "toca en el mapa " + U.art + " " + U.uno + " que te pedimos" + (cur ? " (ahora, " + cur[0] + ")" : "") + ". Si no " + lo + " encuentras, pulsa «Ver respuesta».",
+    name: "mira " + U.art + " " + U.uno + " marcad" + (U.art === "el" ? "o" : "a") + " en el mapa y elige su nombre en los botones de abajo.",
+    cap: "te decimos una capital" + (cur ? " (ahora, " + cur[2] + ")" : "") + " y tocas su " + U.uno + " en el mapa.",
+    gent: "te decimos cómo se llaman sus habitantes" + (S.gentTxt ? " (ahora, «" + S.gentTxt + "»)" : "") + " y tocas su " + U.uno + " en el mapa.",
+    shape: "mira la silueta y elige abajo de qué " + U.uno + " es.",
+    flag: "mira la bandera y elige abajo de qué " + U.uno + " es.",
+    time: "toca en el mapa todas " + (U.art === "el" ? "los que puedas" : "las que puedas") + " en 60 segundos. Si no ves " + (U.art === "el" ? "uno" : "una") + ", pulsa «Saltar».",
+    duel: "por turnos, cada uno busca " + (U.art === "el" ? "el suyo" : "la suya") + " en el mapa y pasa el móvil al otro. " + S.rounds + (S.rounds === 1 ? " ronda" : " rondas") + " cada uno; gana quien acierte más."
+  }[S.mode];
+  if (!t) return;
+  $("#howtoTxt").textContent = t; el.hidden = false;
+  store.set(k, veces + 1);
+}
+// 10 · La primera vez que se falla una provincia pequeña en una pantalla táctil, se explica cómo acercar el mapa
+function avisoZoom() {
+  if (store.get("atlas:avisoZoom") || !matchMedia("(pointer: coarse)").matches || !S.cur || !byId[S.cur] || curK > 1.8) return;
+  const r = byId[S.cur].getBoundingClientRect();
+  if (Math.max(r.width, r.height) > 32) return;
+  store.set("atlas:avisoZoom", true);
+  later(() => toast(null, "Consejo: <b>pellizca el mapa con dos dedos</b> para acercarlo", "warn", 4200), 1500);
+}
 function tickClock() {
   const left = Math.max(0, S.tEnd - Date.now()), s = Math.ceil(left / 1000);
   $("#clockN").textContent = s;
@@ -235,7 +285,7 @@ function answerTimed(id) {
     toast(id, "✓ " + name(id), "ok", 600);
     later(next, 350);
   } else {
-    S.errors++; S.streak = 0;
+    S.errors++; S.streak = 0; avisoZoom();
     if (!S.results[S.cur]) S.results[S.cur] = "bad";
     Sound.play("bad");
     const qc = $("#qcard"); qc.classList.remove("shake"); void qc.offsetWidth; qc.classList.add("shake");

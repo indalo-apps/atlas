@@ -15,6 +15,7 @@
       <svg id="map" viewBox="0 0 960 600" tabindex="0" role="application" aria-roledescription="mapa"
         aria-label="Mapa de provincias. Flechas para moverte entre provincias, Intro para elegir, más y menos para acercar o alejar."></svg>
       <div class="toasts" id="toasts" aria-hidden="true"></div>
+      <div class="cuenta" id="cuenta" hidden><b id="cuentaN">3</b><span>Prepárate…</span></div>
       <div class="shapebox flagbox" id="flagbox" hidden>
         <img id="flagImg" src="data:," alt="">
         <p>¿De qué país es esta bandera?</p>
@@ -49,6 +50,10 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
         </button>
       </div>
+      <button type="button" class="startbtn" id="startBtn">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg>
+        <span class="sb-txt"><b>Empezar a jugar</b><span id="startTxt"></span></span>
+      </button>
       <div class="homebar">
       <div class="mapseg" role="group" aria-label="Mapa">
         <button type="button" data-mapa="es" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>España</button>
@@ -67,39 +72,25 @@
         <span class="zb-txt"><small>Zona</small><b id="zoneName">Toda España</b></span>
         <span class="zb-go">Cambiar<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></span>
       </button>
-      <div class="seg" role="tablist" aria-label="¿Qué quieres hacer?">
-        <button type="button" role="tab" id="tab-aprender" data-tab="aprender" aria-controls="grp-aprender" aria-selected="false" tabindex="-1">Aprender</button>
-        <button type="button" role="tab" id="tab-practicar" data-tab="practicar" aria-controls="grp-practicar" aria-selected="true">Practicar</button>
-        <button type="button" role="tab" id="tab-jugar" data-tab="jugar" aria-controls="grp-jugar" aria-selected="false" tabindex="-1">Jugar</button>
-      </div>
       </div>
       <button type="button" class="resume" id="resumeCard" hidden>
         <span class="rs-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg></span>
         <span class="rs-txt"><b>Seguir con tu partida</b><span id="resumeTxt"></span><i class="rs-bar"><i id="resumeBar"></i></i></span>
       </button>
       <button type="button" class="linkbtn" id="restartLink" hidden>Empezar de nuevo</button>
-      <div class="minimap" id="miniMap" aria-hidden="true"></div>
-      <div class="grp" id="grp-aprender" role="tabpanel" aria-labelledby="tab-aprender" hidden>
-      <div class="modes" role="group" aria-label="Aprender">
+      <button type="button" class="minimap" id="miniMap"></button>
+      <p class="eyebrow" id="juegosTit">Juegos</p>
+      <div class="modes lista" role="group" aria-labelledby="juegosTit">
         <button id="m-explore" data-mode="explore" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.2 15.2L20.5 20.5"/></svg><b>Explorar</b><span>Sin preguntas</span></button>
         <button id="m-due" class="duecard" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4M8.5 15l2.3 2.3 4.7-4.6"/></svg><b>Repaso del día</b><span id="dueTxt">Nada pendiente hoy</span></button>
-      </div>
-      </div>
-      <div class="grp" id="grp-practicar" role="tabpanel" aria-labelledby="tab-practicar">
-      <div class="modes" role="group" aria-label="Practicar">
-        <button id="m-find" data-mode="find" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5"/></svg><b>Encuéntrala</b><span>Toca la provincia</span></button>
-        <button id="m-name" data-mode="name" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.3 9.3a2.8 2.8 0 0 1 5.4 1c0 1.9-2.7 2.3-2.7 4.2"/><path d="M12 17.3v.2"/></svg><b>¿Cuál es?</b><span>Elige el nombre</span></button>
-        <button id="m-cap" data-mode="cap" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.2 6-5.5-3-5.5 3 1.2-6-4.5-4.2 6.1-.8z"/></svg><b>Capitales</b><span>Busca la capital</span></button>
-        <button id="m-gent" data-mode="gent" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 19.5c.6-3 2.7-4.8 5.5-4.8s4.9 1.8 5.5 4.8"/><circle cx="16.8" cy="9.3" r="2.3"/><path d="M15.8 14.8c2.4-.2 4.2 1.3 4.7 4"/></svg><b>Gentilicios</b><span>Por el gentilicio</span></button>
-        <button id="m-shape" data-mode="shape" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 8l3.8-3.5 3.4 2 3.8-1.4 2.8 3.7-1.4 3.7 1.9 3.4-4.2 2.9-3.3-1-3.8 1.9-2.8-3.3.5-3.8z"/></svg><b>Siluetas</b><span>Reconoce la forma</span></button>
-        <button id="m-flag" data-mode="flag" aria-pressed="false" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4.5c4-2 6 2 10 0s4 0 4 0v9s-1.5-1.5-4 0-6-2-10 0"/></svg><b>Banderas</b><span>¿De qué país es?</span></button>
-      </div>
-      </div>
-      <div class="grp" id="grp-jugar" role="tabpanel" aria-labelledby="tab-jugar" hidden>
-      <div class="modes" role="group" aria-label="Jugar">
-        <button id="m-time" data-mode="time" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13.5" r="7"/><path d="M12 13.5V10M9.5 3h5M12 3v3.5M18 7.5l1.5-1.5"/></svg><b>Contrarreloj</b><span><span class="num">60</span> segundos</span></button>
-        <button id="m-duel" data-mode="duel" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 4.5l8 8M19.5 4.5l-8 8"/><path d="M7 17l-3 3M17 17l3 3M5 14.5l4.5 4.5M19 14.5L14.5 19"/></svg><b>Duelo</b><span>Dos jugadores</span></button>
-      </div>
+        <button id="m-find" data-mode="find" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5"/></svg><b>Encuéntrala</b><span>Toca la provincia</span><i class="dif">●○○ Fácil</i></button>
+        <button id="m-name" data-mode="name" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.3 9.3a2.8 2.8 0 0 1 5.4 1c0 1.9-2.7 2.3-2.7 4.2"/><path d="M12 17.3v.2"/></svg><b>¿Cuál es?</b><span>Elige el nombre</span><i class="dif">●○○ Fácil</i></button>
+        <button id="m-cap" data-mode="cap" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.2 6-5.5-3-5.5 3 1.2-6-4.5-4.2 6.1-.8z"/></svg><b>Capitales</b><span>Busca la capital</span><i class="dif">●●○ Media</i></button>
+        <button id="m-gent" data-mode="gent" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 19.5c.6-3 2.7-4.8 5.5-4.8s4.9 1.8 5.5 4.8"/><circle cx="16.8" cy="9.3" r="2.3"/><path d="M15.8 14.8c2.4-.2 4.2 1.3 4.7 4"/></svg><b>Gentilicios</b><span>Por el gentilicio</span><i class="dif">●●○ Media</i></button>
+        <button id="m-flag" data-mode="flag" aria-pressed="false" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4.5c4-2 6 2 10 0s4 0 4 0v9s-1.5-1.5-4 0-6-2-10 0"/></svg><b>Banderas</b><span>¿De qué país es?</span><i class="dif">●●○ Media</i></button>
+        <button id="m-shape" data-mode="shape" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 8l3.8-3.5 3.4 2 3.8-1.4 2.8 3.7-1.4 3.7 1.9 3.4-4.2 2.9-3.3-1-3.8 1.9-2.8-3.3.5-3.8z"/></svg><b>Siluetas</b><span>Reconoce la forma</span><i class="dif">●●● Difícil</i></button>
+        <button id="m-time" data-mode="time" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13.5" r="7"/><path d="M12 13.5V10M9.5 3h5M12 3v3.5M18 7.5l1.5-1.5"/></svg><b>Contrarreloj</b><span><span class="num">60</span> segundos</span><i class="dif">●●● Difícil</i></button>
+        <button id="m-duel" data-mode="duel" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 4.5l8 8M19.5 4.5l-8 8"/><path d="M7 17l-3 3M17 17l3 3M5 14.5l4.5 4.5M19 14.5L14.5 19"/></svg><b>Duelo</b><span>Dos jugadores</span><i class="dif"></i></button>
       </div>
       <div class="modeopts" id="modeOpts">
         <p class="eyebrow" id="optsTitle">Opciones</p>
@@ -109,6 +100,7 @@
         <div class="duelnames" id="duelRow" hidden>
           <label for="p1n">Jugador 1<input id="p1n" maxlength="14" autocomplete="off" placeholder="Jugador 1"></label>
           <label for="p2n">Jugador 2<input id="p2n" maxlength="14" autocomplete="off" placeholder="Jugador 2"></label>
+          <p class="duelreglas" id="duelReglas">Por turnos: cada uno busca la suya en el mapa y pasa el móvil al otro. Gana quien acierte más.</p>
           <button type="button" class="btn primary mobile-only" id="duelGo">Empezar duelo</button>
         </div>
         <label class="check" id="flagCaRow" for="flagCa" hidden>
@@ -140,6 +132,7 @@
       <p class="prompt" id="prompt">Encuentra en el mapa</p>
       <p class="target-name" id="target">…</p>
       <p class="subname" id="sub"></p>
+      <p class="howto" id="howto" hidden><b>Cómo se juega:</b> <span id="howtoTxt"></span></p>
       <div class="options" id="options" hidden></div>
       <p class="feedback" id="feedback" aria-live="polite"></p>
       <div class="row">
@@ -157,7 +150,7 @@
         <dt>Capital</dt><dd id="i-cap">—</dd>
         <dt id="i-ccaa-l">Comunidad</dt><dd id="i-ccaa">—</dd>
       </dl>
-      <p class="note">Pasa el ratón o toca el mapa para ver cada provincia. Cuando te sientas preparado, elige un modo de juego.</p>
+      <p class="note">Pasa el ratón o toca el mapa para ver cada provincia. Cuando quieras, pulsa «Empezar a jugar».</p>
     </div>
 
     <div class="card end" id="endcard" hidden role="dialog" aria-labelledby="e-title">
@@ -202,19 +195,7 @@
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
     </button>
   </div>
-  <div class="mapseg" role="group" aria-label="Mapa (en la ventana de zonas)">
-        <button type="button" data-mapa="es" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>España</button>
-        <button type="button" data-mapa="eu" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Europa</button>
-        <button type="button" data-mapa="am" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>América</button>
-        <button type="button" data-mapa="as" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Asia</button>
-        <button type="button" data-mapa="af" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>África</button>
-        <button type="button" data-mapa="oc" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Oceanía</button>
-      </div>
-      <div class="mapseg mapsub" role="group" aria-label="España por provincias o por comunidades" hidden>
-        <button type="button" data-sub="es" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Provincias</button>
-        <button type="button" data-sub="ca" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Comunidades</button>
-      </div>
-      <p class="zs-note">Vale para todos los modos y se recuerda para la próxima vez. El número es cuántas provincias tiene.</p>
+      <p class="zs-note">Vale para todos los juegos y se recuerda para la próxima vez. El número es cuántas provincias tiene.</p>
       <label class="check zs-peq" for="sinPeq" hidden>
         <input type="checkbox" id="sinPeq">
         <span>Sin países pequeños<small id="sinPeqTxt"></small></span>

@@ -11,6 +11,7 @@ if (M.capTxt) $("#capOnlyTxt").textContent = M.capTxt + (M.sinCap ? ". Israel y 
 $("#shareDl").setAttribute("download", M.archivo);
 if (EU) {
   $("#m-gent").hidden = true;
+  $("#duelReglas").textContent = "Por turnos: cada uno busca el suyo en el mapa y pasa el móvil al otro. Gana quien acierte más.";
   $(".mapwrap").setAttribute("aria-label", "Mapa de " + M.cont);
   $("#map").setAttribute("aria-label", "Mapa de países de " + M.cont + ". Flechas para moverte entre países, Intro para elegir, más y menos para acercar o alejar.");
   $("#regionLabel").textContent = $("#regionChip").textContent = M.cont;
@@ -58,8 +59,8 @@ if (savedMode && document.querySelector('[data-mode="' + savedMode + '"]:not([hi
   pressMode(savedMode);
 }
 if (savedRegion && REGIONS.some(r => r[0] === savedRegion)) { S.region = savedRegion; sel.value = savedRegion; }
-// Primera visita en escritorio: se empieza explorando el mapa, con el menú de modos a la vista
-if (!savedMode && !mqMobile.matches) { S.mode = "explore"; pressMode("explore"); }
+// 5.1 · Primera visita, en el móvil y en el ordenador por igual: se empieza explorando el mapa, con «Empezar a jugar» a la vista
+if (!savedMode) { S.mode = "explore"; pressMode("explore"); }
 renderModeExtras();
 newGame();
 // En el móvil en vertical la app se abre siempre en la pantalla de inicio; en el resto, solo la primera vez

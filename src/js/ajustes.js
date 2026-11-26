@@ -2,6 +2,11 @@
 (function () {
   const VERSION = document.querySelector('meta[name="app-version"]').content;
   const NOVEDADES = [
+    ["5.1", ["▶️ Botón grande «Empezar a jugar» en la portada",
+             "📋 Una sola lista de juegos, de fácil a difícil, con cuántas preguntas tiene cada uno",
+             "💡 «Cómo se juega», con un ejemplo, las primeras veces de cada juego; y 3, 2, 1 antes de Contrarreloj",
+             "🗺️ Toca el mapa de la portada para explorarlo; el mapa se elige solo arriba",
+             "🛠️ El total de la partida ya no cambia al repetir una provincia fallada"]],
     ["5.0.2", ["🛠️ Duelo en el móvil: al elegirlo se ven los nombres y el botón para empezar, sin salirse de la pantalla"]],
     ["5.0.1", ["🛠️ Arreglado: en Banderas de España, debajo de la bandera ya no pregunta por un «país»",
              "🛠️ Gentilicios en el mapa de comunidades: «Toca su comunidad»",

@@ -36,6 +36,7 @@ document.querySelectorAll(".modes button[data-mode]").forEach(b => b.addEventLis
   pressMode(b.dataset.mode);
   S.mode = b.dataset.mode; store.set("atlas:mode", S.mode);
   if (PRACTICA.includes(S.mode)) { ultimaPractica = S.mode; store.set(KP + "practica", S.mode); }
+  if (JUEGOS.includes(S.mode)) store.set("atlas:juego", S.mode); // lo que empezará el botón grande la próxima vez
   renderModeExtras(); newGame();
   // En el móvil, tocar un modo lo empieza (Duelo espera a que se pongan los nombres)
   if (S.mode === "duel") { $("#sheetPlay").textContent = "Empezar"; $("#restart2").hidden = true; }

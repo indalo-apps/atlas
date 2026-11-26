@@ -7,11 +7,10 @@ function openSheet(first) {
   const seguir = !first && enCurso();
   $("#sheetPlay").textContent = seguir ? "Seguir jugando" : "Empezar";
   $("#restart2").hidden = !seguir;
-  if (TAB_OF[S.mode]) showTab(TAB_OF[S.mode]);
   renderResume();
   lastFocus = document.activeElement;
   document.body.classList.add("sheet-open"); $("#backdrop").hidden = false;
-  setTimeout(() => { const b = $("#setcard").querySelector('.modes [aria-pressed="true"]'); if (b) b.focus({ preventScroll: true }); }, 60);
+  setTimeout(() => { const b = [$("#resumeCard"), $("#startBtn")].find(x => !x.hidden) || $("#setcard").querySelector('.modes [aria-pressed="true"]'); if (b) b.focus({ preventScroll: true, focusVisible: false }); }, 60);
 }
 function closeSheet() {
   if (!document.body.classList.contains("sheet-open")) return;

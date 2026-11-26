@@ -52,13 +52,12 @@ $("#m-due").addEventListener("click", () => {
   toast(null, "Repaso del día: <b>" + ids.length + "</b> " + tx("provincias", "países") + " que se te resisten", "ok", 2600);
 });
 $("#flagCa").checked = store.get("atlas:flagCa") === true;
-$("#flagCa").addEventListener("change", () => { store.set("atlas:flagCa", $("#flagCa").checked); if (S.mode === "flag") newGame(); });
+$("#flagCa").addEventListener("change", () => { store.set("atlas:flagCa", $("#flagCa").checked); if (S.mode === "flag") newGame(); else renderCuantas(); });
 $("#capOnly").checked = store.get("atlas:capOnly") !== false;
-$("#capOnly").addEventListener("change", () => { store.set("atlas:capOnly", capOnly()); if (S.mode === "cap") newGame(); });
+$("#capOnly").addEventListener("change", () => { store.set("atlas:capOnly", capOnly()); if (S.mode === "cap") newGame(); else renderCuantas(); });
 function renderModeExtras() {
   $("#capOnlyRow").hidden = S.mode !== "cap"; $("#duelRow").hidden = S.mode !== "duel"; $("#flagCaRow").hidden = EU || CA || S.mode !== "flag";
   $("#modeOpts").hidden = S.mode !== "cap" && S.mode !== "duel" && (EU || CA || S.mode !== "flag"); // la zona ya va arriba
-  if (TAB_OF[S.mode]) showTab(TAB_OF[S.mode]);
   renderTopTabs();
   const b = $('.modes button[data-mode="' + S.mode + '"]');
   $("#optsTitle").textContent = "Opciones · " + (b ? b.querySelector("b").textContent : "");

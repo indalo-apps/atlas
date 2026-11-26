@@ -7,7 +7,9 @@ function pintarMiniMapa() {
   c.removeAttribute("id"); c.removeAttribute("tabindex"); c.removeAttribute("role"); c.removeAttribute("aria-label"); c.removeAttribute("aria-roledescription");
   c.setAttribute("aria-hidden", "true"); c.setAttribute("focusable", "false");
   c.querySelectorAll(".kfocus,.hit,.miss,.flash").forEach(e => e.classList.remove("kfocus", "hit", "miss", "flash"));
-  box.replaceChildren(c);
+  const chip = document.createElement("span"); chip.className = "mm-chip";
+  chip.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.2 15.2L20.5 20.5"/></svg>Toca para explorar el mapa<span class="sr-only"> (sin preguntas)</span>';
+  box.replaceChildren(c, chip);
   // Encuadra las provincias de la zona, medidas sobre la propia copia
   try {
     const m = c.getScreenCTM().inverse(); let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
@@ -21,25 +23,38 @@ function pintarMiniMapa() {
   } catch (e) {}
 }
 
-// ---------- 3.2 · Pestañas Aprender / Practicar / Jugar ----------
-const TAB_OF = { explore: "aprender", find: "practicar", name: "practicar", cap: "practicar", gent: "practicar", shape: "practicar", flag: "practicar", time: "jugar", duel: "jugar" };
-const tabs = [...document.querySelectorAll('.seg [role="tab"]')];
-function showTab(t, focus) {
-  tabs.forEach(b => {
-    const on = b.dataset.tab === t;
-    b.setAttribute("aria-selected", on); b.tabIndex = on ? 0 : -1;
-    $("#grp-" + b.dataset.tab).hidden = !on;
-    if (on && focus) b.focus();
-  });
+// ---------- 5.1 · Sin pestañas: una sola lista de juegos, de fácil a difícil, y un botón grande para empezar ----------
+// El botón empieza el último juego que se usó (la primera vez, «Encuéntrala»); el Duelo no, porque pide los nombres
+const JUEGOS = ["find", "name", "cap", "gent", "flag", "shape", "time"];
+function juegoInicial() {
+  const g = store.get("atlas:juego");
+  return JUEGOS.includes(g) && !document.querySelector('.modes button[data-mode="' + g + '"]').hidden ? g : "find";
 }
-tabs.forEach((b, i) => {
-  b.addEventListener("click", () => showTab(b.dataset.tab));
-  b.addEventListener("keydown", e => {
-    const k = { ArrowLeft: -1, ArrowRight: 1 }[e.key];
-    if (k) { e.preventDefault(); showTab(tabs[(i + k + tabs.length) % tabs.length].dataset.tab, true); }
-    else if (e.key === "Home" || e.key === "End") { e.preventDefault(); showTab(tabs[e.key === "Home" ? 0 : tabs.length - 1].dataset.tab, true); }
+const nombreJuego = m => { const b = $('.modes button[data-mode="' + m + '"]'); return b ? b.querySelector("b").textContent : ""; };
+function cuantas(m) {
+  if (m === "time") return "60 segundos";
+  const n = preguntasDe(m).base.length;
+  if (m === "duel") { const r = Math.max(1, Math.round(n / 2)); return r + (r === 1 ? " ronda" : " rondas") + " cada uno"; }
+  return n + " " + (n === 1 ? U.uno : U.unos);
+}
+// 3 · Cuántas preguntas tiene cada juego, a la vista antes de empezar
+function renderCuantas() {
+  document.querySelectorAll(".modes button[data-mode] .dif").forEach(d => {
+    const m = d.parentNode.dataset.mode;
+    if (d.dataset.base === undefined) d.dataset.base = d.textContent;
+    if (m === "time") return; // «60 segundos» ya va en su descripción
+    d.textContent = (d.dataset.base ? d.dataset.base + " · " : "") + cuantas(m);
   });
-});
+  const g = juegoInicial();
+  $("#startTxt").textContent = nombreJuego(g) + " · " + ZN(S.region) + " · " + cuantas(g);
+}
+function empezarJuego(m) {
+  const b = $('.modes button[data-mode="' + m + '"]');
+  if (b) b.click();
+}
+$("#startBtn").addEventListener("click", () => empezarJuego(juegoInicial()));
+// 11 · El mapa de la portada se puede tocar: lleva a Explorar
+$("#miniMap").addEventListener("click", () => empezarJuego("explore"));
 
 // ---------- 3.2 · Zona arriba, con su propia ventana para elegirla ----------
 const zoneName = ZN;
@@ -100,7 +115,7 @@ if (EU) {
   $("#sinPeq").addEventListener("change", e => {
     store.set(KP + "sinPeq", e.target.checked);
     $("#zoneGrid").querySelectorAll("button").forEach(b => b.querySelector(".zc").textContent = zoneCount(b.dataset.zone));
-    if (!enCurso()) newGame();
+    if (!enCurso()) newGame(); else renderCuantas();
     setTimeout(pintarMiniMapa, 50);
     announce(e.target.checked ? "Sin países pequeños." : "Con todos los países.");
   });
@@ -109,19 +124,20 @@ $("#setcard").addEventListener("transitionend", e => { if (e.target.id === "setc
 $("#tbZone").addEventListener("click", openZones);
 // Barra superior de la partida: «Inicio» vuelve a la pantalla de inicio; al lado, el modo en que estás
 $("#tbHome").addEventListener("click", () => openSheet(false));
-function renderTopTabs() { const b = $('.modes button[data-mode="' + S.mode + '"]'); $("#tbMode").textContent = b ? b.querySelector("b").textContent : ""; }
+function renderTopTabs() { $("#tbMode").textContent = nombreJuego(S.mode); }
 // ---------- 3.6 · Partida a medias: tarjeta «Seguir», progreso en su modo y «Empezar de nuevo» con aviso ----------
 function progreso() {
   const n = Object.keys(S.results).length;
   if (S.mode === "time") return { txt: S.hits + (S.hits === 1 ? " acierto" : " aciertos"), f: 0 };
   if (S.mode === "duel") return { txt: "Ronda " + Math.min(S.rounds, Math.ceil(S.qn / 2)) + " de " + S.rounds, f: S.rounds ? Math.min(1, Math.ceil(S.qn / 2) / S.rounds) : 0 };
-  const done = Math.max(0, S.total - S.queue.length - (S.cur && !S.locked ? 1 : 0));
-  return { txt: done + "/" + S.total, f: S.total ? done / S.total : 0, n };
+  const done = hechas();
+  return { txt: done + "/" + S.n0, f: S.n0 ? done / S.n0 : 0, n };
 }
 function renderResume() {
   const on = enCurso();
   document.querySelectorAll(".modes .prog").forEach(e => e.remove());
   $("#resumeCard").hidden = !on || !mqMobile.matches;
+  $("#startBtn").hidden = on && mqMobile.matches; // con una partida a medias, manda «Seguir con tu partida»
   $("#restartLink").hidden = !on || !mqMobile.matches || mqHome.matches; // en el móvil vertical ya está en la barra de arriba
   if (!on) return;
   const p = progreso(), b = $('.modes button[data-mode="' + S.mode + '"]'), modo = b ? b.querySelector("b").textContent : "";

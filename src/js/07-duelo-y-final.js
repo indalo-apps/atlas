@@ -69,7 +69,7 @@ function answer(id, btn) {
   if (S.tries < 3) Sound.play("bad");
   const qc = $("#qcard"); qc.classList.remove("shake"); void qc.offsetWidth; qc.classList.add("shake");
   if (btn) { btn.classList.add("bad"); btn.disabled = true; }
-  else { cls(id, "flash-bad"); toast(id, "Eso es " + name(id) + (S.mode === "gent" && (CA ? GENT_CA : GENT)[id] ? " (" + gents(id).join(" o ") + ")" : ""), "bad", 1400); setTimeout(() => cls(id, "flash-bad", false), 1400); }
+  else { avisoZoom(); cls(id, "flash-bad"); toast(id, "Eso es " + name(id) + (S.mode === "gent" && (CA ? GENT_CA : GENT)[id] ? " (" + gents(id).join(" o ") + ")" : ""), "bad", 1400); setTimeout(() => cls(id, "flash-bad", false), 1400); }
   if (S.tries === 1) memUpdate(S.cur, false);
   if (S.tries >= 3) return reveal();
   fb.className = "feedback bad";
@@ -96,7 +96,7 @@ function reveal() {
   $("#feedback").textContent = "Era " + nm + (nm !== cap && !FCA() ? " (capital: " + cap + ")" : "") + ". Volverá a salir más adelante." +
     (S.mode === "flag" ? " Su bandera: " + bandera(S.cur) + "." : "");
   // Repetición: vuelve a la cola unas preguntas más tarde, una sola vez
-  if (!S.requeued[S.cur]) { S.requeued[S.cur] = true; S.queue.splice(Math.min(3, S.queue.length), 0, S.cur); S.total++; }
+  if (!S.requeued[S.cur]) { S.requeued[S.cur] = true; S.queue.splice(Math.min(3, S.queue.length), 0, S.cur); S.total++; } // S.total cuenta preguntas; lo que se ve es S.n0
   renderStats();
   later(next, 2600);
 }
@@ -109,9 +109,14 @@ function countUp(el, to, ms) {
   requestAnimationFrame(tick);
 }
 function fmt(ms) { const s = Math.floor(ms / 1000); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }
+// 5.1 · Hechas: las que ya no van a volver a salir. El total no cambia aunque una provincia fallada vuelva a la cola
+function hechas() {
+  const quedan = new Set(S.queue); if (S.cur && !S.locked) quedan.add(S.cur);
+  return Math.max(0, (S.n0 || 0) - quedan.size);
+}
 function renderStats() {
-  const done = S.total - S.queue.length - (S.cur && !S.locked ? 1 : 0);
-  $("#s-done").textContent = S.mode === "time" ? S.hits : Math.max(0, done) + "/" + S.total;
+  const done = hechas();
+  $("#s-done").textContent = S.mode === "time" ? S.hits : done + "/" + S.n0;
   $("#s-score").textContent = S.mode === "duel" ? S.pts[1] : S.score;
   $("#s-streak").textContent = S.mode === "duel" ? Math.min(S.rounds, Math.ceil(S.qn / 2)) + "/" + S.rounds : S.streak;
   if (S.mode === "duel") $("#s-done").textContent = S.pts[0];
@@ -119,9 +124,10 @@ function renderStats() {
   sb.hidden = S.streak < 3 || !S.cur || S.mode === "time" || S.mode === "duel";
   $("#streakN").textContent = S.streak;
   sb.classList.toggle("hot", S.streak >= 10);
-  const pct = S.total ? Math.round(Math.max(0, done) / S.total * 100) : 0;
+  const pct = S.n0 ? Math.round(done / S.n0 * 100) : 0;
   if (S.mode !== "time") $("#bar").style.width = pct + "%";
   $("#progress").setAttribute("aria-valuenow", pct);
+  if (S.hits + S.errors > 0 || (S.mode === "duel" && S.qn > 1)) $("#howto").hidden = true; // tras la primera respuesta ya no hace falta
   $("#restart").hidden = !(S.hits + S.errors > 0 || Object.keys(S.results).length > 0 || (S.mode === "duel" && S.qn > 1));
 }
 

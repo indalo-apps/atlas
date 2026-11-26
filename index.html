@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="5.0.2">
+<meta name="app-version" content="5.1">
 <title>Atlas</title>
 <meta name="author" content="Adela Moreno Vega y Carlos Moreno Otto">
 <meta name="copyright" content="© 2026 Adela Moreno Vega y Carlos Moreno Otto. Todos los derechos reservados.">
@@ -185,6 +185,7 @@ svg#map:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; 
 .toast::after { content: ""; position: absolute; left: var(--tip, 50%); bottom: -6px; width: 10px; height: 10px; margin-left: -5px; background: inherit;
   border-right: inherit; border-bottom: inherit; transform: rotate(45deg); }
 .toast.top { transform: translate(-50%, 0); } .toast.top::after { display: none; }
+.toast.top { white-space: normal; width: max-content; text-align: center; } /* los avisos largos de arriba pueden ocupar dos líneas */
 .toast.ok { border-color: var(--ok); color: var(--ok); }
 .toast.bad { border-color: var(--bad); color: var(--bad); }
 .toast.warn { border-color: var(--warn); color: color-mix(in srgb, var(--warn) 75%, var(--ink)); }
@@ -204,6 +205,7 @@ svg#map:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; 
   align-items: center; align-content: center; }
 /* Si un grupo tiene un número impar de modos, el último ocupa todo el ancho */
 .modes > button:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.modes button[hidden] { display: none; }
 .modes button span .num { font-weight: inherit; }
 .modes button svg { grid-row: span 2; width: 26px; height: 26px; fill: none; stroke: var(--accent); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .modes button b, .modes button span { grid-column: 2; }
@@ -231,7 +233,7 @@ svg#map:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; 
 .aj .ajrow .ik-btn { flex: 1; }
 .aj .nov h4 { margin: 10px 0 2px; } .aj .nov ul { margin: 0; padding-left: 20px; }
 .soundbtn { display: inline-flex; align-items: center; gap: 8px; font: 700 .85rem/1 var(--f-body); color: var(--ink); background: var(--bg);
-  border: 1.5px solid transparent; border-radius: 99px; padding: 8px 12px 8px 10px; cursor: pointer; }
+  border: 1.5px solid transparent; border-radius: 99px; padding: 8px 12px 8px 10px; min-height: 44px; cursor: pointer; }
 .soundbtn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .soundbtn .mute { display: none; }
 .soundbtn[aria-pressed="false"] .mute { display: inline; } .soundbtn[aria-pressed="false"] .wave { display: none; }
@@ -253,9 +255,9 @@ svg#map:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; 
   font: 600 1rem/1 var(--f-display); transition: background-color .15s ease, color .15s ease; }
 .seg button[aria-selected="true"] { background: var(--panel); color: var(--accent); box-shadow: 0 1px 4px var(--shadow); }
 .seg button:hover:not([aria-selected="true"]) { color: var(--ink); }
-.grp .modes { grid-template-columns: minmax(0, 1fr); }
-.grp .modes button { min-height: 58px; padding: 10px 12px; }
-.grp .modes button b { font-size: 1.02rem; } .grp .modes button span { font-size: 0.84rem; }
+.modes.lista { grid-template-columns: minmax(0, 1fr); }
+.modes.lista button { min-height: 58px; padding: 10px 12px; }
+.modes.lista button b { font-size: 1.02rem; } .modes.lista button span { font-size: 0.84rem; }
 .minimap { display: none; }
 .resume { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 64px; padding: 10px 14px; border-radius: 14px; cursor: pointer; text-align: left;
   border: 0; background: var(--accent); color: var(--accent-ink); font: inherit; box-shadow: 0 3px 10px color-mix(in srgb, var(--accent) 30%, transparent); }
@@ -493,9 +495,8 @@ a.btn { text-decoration: none; display: inline-block; }
   #setcard .sheet-head small { display: block; font-family: var(--f-body); font-weight: 400; font-size: 0.82rem; color: var(--muted); letter-spacing: 0; }
   #setcard .zonebtn, #setcard .seg { flex: none; }
   #setcard .seg { background: var(--rule); }
-  #setcard .grp .modes button { background: var(--panel); }
-  .homebar { position: sticky; top: calc(-12px - env(safe-area-inset-top, 0px)); z-index: 2; display: flex; flex-direction: column; gap: 10px;
-    margin: 0 -16px; padding: 8px 16px; background: var(--bg); }
+  #setcard .modes.lista button { background: var(--panel); }
+  .homebar { display: flex; flex-direction: column; gap: 10px; }
   .app { grid-template-rows: auto auto minmax(0, 1fr) auto; }
   .topbar { display: flex; grid-row: 1; grid-column: 1; gap: 6px; align-items: stretch; }
   #qcard, #infocard { grid-row: 2; } .app > .mapwrap { grid-row: 3; } #statcard { grid-row: 4; }
@@ -504,15 +505,14 @@ a.btn { text-decoration: none; display: inline-block; }
   .tb-zone b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
   .tb-zone svg { flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .tb-zone .zb-pin { width: 18px; height: 18px; color: var(--accent); } .tb-zone .tb-chev { width: 16px; height: 16px; color: var(--accent); }
-  .tb-zone { flex: 0 1 auto; max-width: 60%; }
-  .tb-mode { flex: 1 3 auto; min-width: 0; align-self: center; text-align: center; font: 600 0.9rem/1.1 var(--f-display); color: var(--muted);
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tb-zone { flex: 0 1 auto; min-width: 0; max-width: none; }
+  .tb-mode { flex: 1 0 auto; align-self: center; text-align: center; font: 600 0.88rem/1.1 var(--f-display); color: var(--ink); white-space: nowrap; }
   .tb-restart { display: grid; place-items: center; flex: none; width: 44px; min-height: 44px; border-radius: 12px; cursor: pointer;
     border: 1.5px solid var(--rule); background: var(--panel); color: var(--ink); }
   .tb-restart svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .tb-restart:focus-visible { outline: 2.5px solid var(--accent); outline-offset: 2px; }
   .tb-home { flex: none; display: flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; border-radius: 12px; cursor: pointer;
-    border: 0; background: var(--accent); color: var(--accent-ink); font: 700 0.9rem/1 var(--f-body); }
+    border: 1.5px solid var(--rule); background: var(--panel); color: var(--ink); font: 700 0.9rem/1 var(--f-body); }
   .tb-home svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .tb-zone:focus-visible, .tb-home:focus-visible { outline: 2.5px solid var(--accent); outline-offset: 2px; }
   /* 3.5 · Un solo camino al inicio (la barra de arriba): fuera «Menú», el botón sobre el mapa y la ✕ */
@@ -555,6 +555,32 @@ body.tablet .app > .panel { overflow-y: auto; min-height: 0; padding-bottom: 8px
 body.tablet .zoomctl button { width: 46px; height: 46px; }
 body.tablet .keyhelp .kh-mouse { display: none; } body.tablet .keyhelp .kh-touch { display: inline; }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+/* ---------- 5.1 · Portada: botón grande para empezar, una sola lista de juegos y mapa que se puede tocar ---------- */
+.startbtn { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 68px; padding: 12px 16px; border-radius: 16px; cursor: pointer; text-align: left;
+  border: 0; background: var(--accent); color: var(--accent-ink); font: inherit; box-shadow: 0 3px 10px color-mix(in srgb, var(--accent) 30%, transparent); flex: none; }
+.startbtn[hidden] { display: none; }
+.startbtn > svg { flex: none; width: 40px; height: 40px; padding: 10px; box-sizing: border-box; border-radius: 99px; fill: currentColor; background: color-mix(in srgb, var(--accent-ink) 20%, transparent); }
+.sb-txt { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.sb-txt b { font: 700 1.2rem/1.15 var(--f-display); }
+.sb-txt > span { font-size: 0.86rem; opacity: .95; }
+.startbtn:focus-visible { outline: 2.5px solid var(--ink); outline-offset: 2px; }
+.modes button .dif { grid-column: 2; font-style: normal; font-size: 0.78rem; font-weight: 700; color: var(--muted); }
+.modes.lista button svg { grid-row: span 3; }
+#juegosTit { margin-top: 4px; }
+button.minimap { border: 0; padding: 0; width: 100%; cursor: pointer; font: inherit; color: var(--ink); }
+button.minimap:focus-visible { outline: 2.5px solid var(--accent); outline-offset: 2px; }
+.mm-chip { position: absolute; left: 10px; bottom: 10px; display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 99px;
+  background: var(--panel); color: var(--ink); font: 700 0.82rem/1 var(--f-body); box-shadow: 0 1px 4px var(--shadow); }
+.minimap .mm-chip svg { position: static; width: 16px; height: 16px; fill: none; stroke: var(--accent); stroke-width: 2.2; stroke-linecap: round; }
+.howto { margin: 6px 0 0; padding: 8px 10px; border-radius: 10px; background: var(--bg); color: var(--ink); font-size: 0.88rem; line-height: 1.35; }
+.howto[hidden] { display: none; }
+.duelreglas { grid-column: 1 / -1; margin: 0; font-size: 0.84rem; color: var(--ink); line-height: 1.35; }
+.cuenta { position: absolute; inset: 0; z-index: 6; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  background: color-mix(in srgb, var(--bg) 70%, transparent); pointer-events: none; }
+.cuenta[hidden] { display: none; }
+.cuenta b { font: 800 5.5rem/1 var(--f-display); color: var(--ink); }
+.cuenta span { font: 700 1.1rem/1 var(--f-body); color: var(--ink); }
 </style>
 <style>
 /* ===== Kit común: ayuda para instalar y aviso amarillo ===== */
@@ -587,7 +613,7 @@ body.tablet .keyhelp .kh-mouse { display: none; } body.tablet .keyhelp .kh-touch
 .ik-banner img{width:36px;height:36px;border-radius:9px;flex:none}
 .ik-banner div{flex:1;min-width:0}
 .ik-banner b{display:block;font-size:15px}
-.ik-banner .ik-btn{background:#2b2100;color:#ffe066;min-height:40px;padding:8px 12px;font-size:14px}
+.ik-banner .ik-btn{background:#2b2100;color:#ffe066;min-height:44px;padding:8px 12px;font-size:14px}
 .ik-bx{flex:none;width:44px;height:44px;border:0;background:none;color:#5c4a00;font-size:22px;cursor:pointer}
 @media (prefers-color-scheme:dark){.ik-sheet{background:#1c2430;color:#e8edf3}.ik-muted{color:#a9b4c2}.ik-nota{background:#26313f}.ik-steps li{border-color:#2d3846}.ik-x{background:#2a3442;color:#e8edf3}.ik-ghost{background:#26313f;color:#9cc0ff}.ik-kbd{border-color:#4a5666}}
 @media (prefers-reduced-motion:no-preference){.ik-sheet{animation:ik-up .22s ease-out}@keyframes ik-up{from{transform:translateY(30px);opacity:0}}}
@@ -772,6 +798,7 @@ const IK = (function(){
       <svg id="map" viewBox="0 0 960 600" tabindex="0" role="application" aria-roledescription="mapa"
         aria-label="Mapa de provincias. Flechas para moverte entre provincias, Intro para elegir, más y menos para acercar o alejar."></svg>
       <div class="toasts" id="toasts" aria-hidden="true"></div>
+      <div class="cuenta" id="cuenta" hidden><b id="cuentaN">3</b><span>Prepárate…</span></div>
       <div class="shapebox flagbox" id="flagbox" hidden>
         <img id="flagImg" src="data:," alt="">
         <p>¿De qué país es esta bandera?</p>
@@ -806,6 +833,10 @@ const IK = (function(){
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
         </button>
       </div>
+      <button type="button" class="startbtn" id="startBtn">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg>
+        <span class="sb-txt"><b>Empezar a jugar</b><span id="startTxt"></span></span>
+      </button>
       <div class="homebar">
       <div class="mapseg" role="group" aria-label="Mapa">
         <button type="button" data-mapa="es" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>España</button>
@@ -824,39 +855,25 @@ const IK = (function(){
         <span class="zb-txt"><small>Zona</small><b id="zoneName">Toda España</b></span>
         <span class="zb-go">Cambiar<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg></span>
       </button>
-      <div class="seg" role="tablist" aria-label="¿Qué quieres hacer?">
-        <button type="button" role="tab" id="tab-aprender" data-tab="aprender" aria-controls="grp-aprender" aria-selected="false" tabindex="-1">Aprender</button>
-        <button type="button" role="tab" id="tab-practicar" data-tab="practicar" aria-controls="grp-practicar" aria-selected="true">Practicar</button>
-        <button type="button" role="tab" id="tab-jugar" data-tab="jugar" aria-controls="grp-jugar" aria-selected="false" tabindex="-1">Jugar</button>
-      </div>
       </div>
       <button type="button" class="resume" id="resumeCard" hidden>
         <span class="rs-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg></span>
         <span class="rs-txt"><b>Seguir con tu partida</b><span id="resumeTxt"></span><i class="rs-bar"><i id="resumeBar"></i></i></span>
       </button>
       <button type="button" class="linkbtn" id="restartLink" hidden>Empezar de nuevo</button>
-      <div class="minimap" id="miniMap" aria-hidden="true"></div>
-      <div class="grp" id="grp-aprender" role="tabpanel" aria-labelledby="tab-aprender" hidden>
-      <div class="modes" role="group" aria-label="Aprender">
+      <button type="button" class="minimap" id="miniMap"></button>
+      <p class="eyebrow" id="juegosTit">Juegos</p>
+      <div class="modes lista" role="group" aria-labelledby="juegosTit">
         <button id="m-explore" data-mode="explore" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.2 15.2L20.5 20.5"/></svg><b>Explorar</b><span>Sin preguntas</span></button>
         <button id="m-due" class="duecard" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4M8.5 15l2.3 2.3 4.7-4.6"/></svg><b>Repaso del día</b><span id="dueTxt">Nada pendiente hoy</span></button>
-      </div>
-      </div>
-      <div class="grp" id="grp-practicar" role="tabpanel" aria-labelledby="tab-practicar">
-      <div class="modes" role="group" aria-label="Practicar">
-        <button id="m-find" data-mode="find" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5"/></svg><b>Encuéntrala</b><span>Toca la provincia</span></button>
-        <button id="m-name" data-mode="name" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.3 9.3a2.8 2.8 0 0 1 5.4 1c0 1.9-2.7 2.3-2.7 4.2"/><path d="M12 17.3v.2"/></svg><b>¿Cuál es?</b><span>Elige el nombre</span></button>
-        <button id="m-cap" data-mode="cap" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.2 6-5.5-3-5.5 3 1.2-6-4.5-4.2 6.1-.8z"/></svg><b>Capitales</b><span>Busca la capital</span></button>
-        <button id="m-gent" data-mode="gent" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 19.5c.6-3 2.7-4.8 5.5-4.8s4.9 1.8 5.5 4.8"/><circle cx="16.8" cy="9.3" r="2.3"/><path d="M15.8 14.8c2.4-.2 4.2 1.3 4.7 4"/></svg><b>Gentilicios</b><span>Por el gentilicio</span></button>
-        <button id="m-shape" data-mode="shape" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 8l3.8-3.5 3.4 2 3.8-1.4 2.8 3.7-1.4 3.7 1.9 3.4-4.2 2.9-3.3-1-3.8 1.9-2.8-3.3.5-3.8z"/></svg><b>Siluetas</b><span>Reconoce la forma</span></button>
-        <button id="m-flag" data-mode="flag" aria-pressed="false" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4.5c4-2 6 2 10 0s4 0 4 0v9s-1.5-1.5-4 0-6-2-10 0"/></svg><b>Banderas</b><span>¿De qué país es?</span></button>
-      </div>
-      </div>
-      <div class="grp" id="grp-jugar" role="tabpanel" aria-labelledby="tab-jugar" hidden>
-      <div class="modes" role="group" aria-label="Jugar">
-        <button id="m-time" data-mode="time" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13.5" r="7"/><path d="M12 13.5V10M9.5 3h5M12 3v3.5M18 7.5l1.5-1.5"/></svg><b>Contrarreloj</b><span><span class="num">60</span> segundos</span></button>
-        <button id="m-duel" data-mode="duel" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 4.5l8 8M19.5 4.5l-8 8"/><path d="M7 17l-3 3M17 17l3 3M5 14.5l4.5 4.5M19 14.5L14.5 19"/></svg><b>Duelo</b><span>Dos jugadores</span></button>
-      </div>
+        <button id="m-find" data-mode="find" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5"/></svg><b>Encuéntrala</b><span>Toca la provincia</span><i class="dif">●○○ Fácil</i></button>
+        <button id="m-name" data-mode="name" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.3 9.3a2.8 2.8 0 0 1 5.4 1c0 1.9-2.7 2.3-2.7 4.2"/><path d="M12 17.3v.2"/></svg><b>¿Cuál es?</b><span>Elige el nombre</span><i class="dif">●○○ Fácil</i></button>
+        <button id="m-cap" data-mode="cap" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.2 6-5.5-3-5.5 3 1.2-6-4.5-4.2 6.1-.8z"/></svg><b>Capitales</b><span>Busca la capital</span><i class="dif">●●○ Media</i></button>
+        <button id="m-gent" data-mode="gent" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 19.5c.6-3 2.7-4.8 5.5-4.8s4.9 1.8 5.5 4.8"/><circle cx="16.8" cy="9.3" r="2.3"/><path d="M15.8 14.8c2.4-.2 4.2 1.3 4.7 4"/></svg><b>Gentilicios</b><span>Por el gentilicio</span><i class="dif">●●○ Media</i></button>
+        <button id="m-flag" data-mode="flag" aria-pressed="false" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4"/><path d="M5 4.5c4-2 6 2 10 0s4 0 4 0v9s-1.5-1.5-4 0-6-2-10 0"/></svg><b>Banderas</b><span>¿De qué país es?</span><i class="dif">●●○ Media</i></button>
+        <button id="m-shape" data-mode="shape" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 8l3.8-3.5 3.4 2 3.8-1.4 2.8 3.7-1.4 3.7 1.9 3.4-4.2 2.9-3.3-1-3.8 1.9-2.8-3.3.5-3.8z"/></svg><b>Siluetas</b><span>Reconoce la forma</span><i class="dif">●●● Difícil</i></button>
+        <button id="m-time" data-mode="time" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13.5" r="7"/><path d="M12 13.5V10M9.5 3h5M12 3v3.5M18 7.5l1.5-1.5"/></svg><b>Contrarreloj</b><span><span class="num">60</span> segundos</span><i class="dif">●●● Difícil</i></button>
+        <button id="m-duel" data-mode="duel" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 4.5l8 8M19.5 4.5l-8 8"/><path d="M7 17l-3 3M17 17l3 3M5 14.5l4.5 4.5M19 14.5L14.5 19"/></svg><b>Duelo</b><span>Dos jugadores</span><i class="dif"></i></button>
       </div>
       <div class="modeopts" id="modeOpts">
         <p class="eyebrow" id="optsTitle">Opciones</p>
@@ -866,6 +883,7 @@ const IK = (function(){
         <div class="duelnames" id="duelRow" hidden>
           <label for="p1n">Jugador 1<input id="p1n" maxlength="14" autocomplete="off" placeholder="Jugador 1"></label>
           <label for="p2n">Jugador 2<input id="p2n" maxlength="14" autocomplete="off" placeholder="Jugador 2"></label>
+          <p class="duelreglas" id="duelReglas">Por turnos: cada uno busca la suya en el mapa y pasa el móvil al otro. Gana quien acierte más.</p>
           <button type="button" class="btn primary mobile-only" id="duelGo">Empezar duelo</button>
         </div>
         <label class="check" id="flagCaRow" for="flagCa" hidden>
@@ -897,6 +915,7 @@ const IK = (function(){
       <p class="prompt" id="prompt">Encuentra en el mapa</p>
       <p class="target-name" id="target">…</p>
       <p class="subname" id="sub"></p>
+      <p class="howto" id="howto" hidden><b>Cómo se juega:</b> <span id="howtoTxt"></span></p>
       <div class="options" id="options" hidden></div>
       <p class="feedback" id="feedback" aria-live="polite"></p>
       <div class="row">
@@ -914,7 +933,7 @@ const IK = (function(){
         <dt>Capital</dt><dd id="i-cap">—</dd>
         <dt id="i-ccaa-l">Comunidad</dt><dd id="i-ccaa">—</dd>
       </dl>
-      <p class="note">Pasa el ratón o toca el mapa para ver cada provincia. Cuando te sientas preparado, elige un modo de juego.</p>
+      <p class="note">Pasa el ratón o toca el mapa para ver cada provincia. Cuando quieras, pulsa «Empezar a jugar».</p>
     </div>
 
     <div class="card end" id="endcard" hidden role="dialog" aria-labelledby="e-title">
@@ -959,19 +978,7 @@ const IK = (function(){
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
     </button>
   </div>
-  <div class="mapseg" role="group" aria-label="Mapa (en la ventana de zonas)">
-        <button type="button" data-mapa="es" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>España</button>
-        <button type="button" data-mapa="eu" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Europa</button>
-        <button type="button" data-mapa="am" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>América</button>
-        <button type="button" data-mapa="as" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Asia</button>
-        <button type="button" data-mapa="af" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>África</button>
-        <button type="button" data-mapa="oc" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Oceanía</button>
-      </div>
-      <div class="mapseg mapsub" role="group" aria-label="España por provincias o por comunidades" hidden>
-        <button type="button" data-sub="es" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Provincias</button>
-        <button type="button" data-sub="ca" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Comunidades</button>
-      </div>
-      <p class="zs-note">Vale para todos los modos y se recuerda para la próxima vez. El número es cuántas provincias tiene.</p>
+      <p class="zs-note">Vale para todos los juegos y se recuerda para la próxima vez. El número es cuántas provincias tiene.</p>
       <label class="check zs-peq" for="sinPeq" hidden>
         <input type="checkbox" id="sinPeq">
         <span>Sin países pequeños<small id="sinPeqTxt"></small></span>
@@ -1781,7 +1788,7 @@ function dueIds(modo = ultimaPractica) {
 }
 function renderDue() {
   const n = dueIds().length, nombre = $("#m-" + ultimaPractica).querySelector("b").textContent;
-  $("#m-due").disabled = !n;
+  $("#m-due").disabled = !n; $("#m-due").hidden = !n; // 5.1 · solo se ve cuando hay algo que repasar
   $("#dueTxt").innerHTML = n ? numify(n + (n === 1 ? " pendiente" : " pendientes") + " · " + nombre) : "Nada pendiente hoy";
 }
 // 4.3.2 · ¿Hay algo que una actualización no debe cortar? Una partida empezada o sus resultados en pantalla
@@ -1790,39 +1797,46 @@ window.atlasEnPartida = () => typeof S !== "undefined" && S.mode !== "explore" &
   (S.cur ? (S.hits + S.errors) > 0 : Object.keys(S.results || {}).length > 0);
 const pending = [];
 function later(fn, ms) { pending.push(setTimeout(fn, ms)); }
+// 5.1 · Las preguntas de un juego en la zona elegida (también sirve para decir cuántas son antes de empezar)
+function preguntasDe(modo, onlyIds) {
+  let pool = poolFor(S.region), base = (onlyIds || pool).slice(), capAviso = false, gentAviso = false, shapeAviso = false;
+  if (modo === "gent") { // Las dos provincias de Canarias no tienen gentilicio propio: esa zona se juega con toda España
+    const conG = id => (CA ? GENT_CA : GENT)[id], g = base.filter(conG);
+    if (g.length) base = g; else { base = ALL.filter(conG); pool = base.slice(); gentAviso = true; }
+  }
+  if (modo === "shape" && NO_SHAPE.length) { // islas diminutas: sin silueta; si la zona solo tiene de esas, se juega con todo el mapa
+    const b2 = base.filter(id => !NO_SHAPE.includes(id));
+    if (b2.length) base = b2; else if (!onlyIds) { base = ALL.filter(id => !NO_SHAPE.includes(id)); pool = base.slice(); shapeAviso = true; }
+  }
+  if (modo === "duel") { // 10 rondas por jugador como mucho, alternando turnos
+    const rondas = Math.max(1, Math.min(10, Math.floor(base.length / 2)));
+    base = shuffle(base).slice(0, rondas * 2);
+    if (base.length < rondas * 2) base = base.concat(shuffle(ALL.filter(id => pool.includes(id))).slice(0, rondas * 2 - base.length));
+  }
+  if (modo === "flag" && !EU) {
+    if (CA) {} else if (flagCa()) { // una provincia por comunidad (la que haga de comunidad en la pregunta)
+      const vistas = {}; base = shuffle(base).filter(id => !vistas[P[id][3]] && (vistas[P[id][3]] = true));
+    } else { const b2 = base.filter(id => !SIN_BANDERA.includes(id) && !NO_SE_PREGUNTA.includes(id)); if (b2.length) base = b2; }
+  }
+  if (modo === "cap" && M.sinCap) { const b2 = base.filter(id => !M.sinCap.includes(id)); if (b2.length) base = b2; } // capitales en disputa: no se preguntan
+  if (modo === "cap" && capOnly() && !onlyIds) {
+    const distintas = base.filter(id => M.capIgual ? !M.capIgual.includes(id) : !P[id][2].startsWith(P[id][0]));
+    if (distintas.length) base = distintas; else capAviso = true;
+  }
+  return { pool, base, capAviso, gentAviso, shapeAviso };
+}
 function newGame(onlyIds) {
   if (window.atlasActualizarSiToca && window.atlasActualizarSiToca()) return; // versión nueva esperando: se estrena ya, antes de empezar
   clearInterval(S.timer);
   pending.splice(0).forEach(clearTimeout); // lo que quedara de la partida anterior (pasar de pregunta, mensajes)
   $("#toasts").innerHTML = "";
   clearMarks();
-  S.pool = poolFor(S.region);
-  let base = (onlyIds || S.pool).slice(), capAviso = false, gentAviso = false, shapeAviso = false;
-  if (S.mode === "gent") { // Las dos provincias de Canarias no tienen gentilicio propio: esa zona se juega con toda España
-    const conG = id => (CA ? GENT_CA : GENT)[id], g = base.filter(conG);
-    if (g.length) base = g; else { base = ALL.filter(conG); S.pool = base.slice(); gentAviso = true; }
-  }
-  if (S.mode === "shape" && NO_SHAPE.length) { // islas diminutas: sin silueta; si la zona solo tiene de esas, se juega con todo el mapa
-    const b2 = base.filter(id => !NO_SHAPE.includes(id));
-    if (b2.length) base = b2; else if (!onlyIds) { base = ALL.filter(id => !NO_SHAPE.includes(id)); S.pool = base.slice(); shapeAviso = true; }
-  }
-  if (S.mode === "duel") { // 10 rondas por jugador como mucho, alternando turnos
-    S.rounds = Math.max(1, Math.min(10, Math.floor(base.length / 2)));
-    base = shuffle(base).slice(0, S.rounds * 2);
-    if (base.length < S.rounds * 2) base = base.concat(shuffle(ALL.filter(id => S.pool.includes(id))).slice(0, S.rounds * 2 - base.length));
-  }
-  if (S.mode === "flag" && !EU) {
-    if (CA) {} else if (flagCa()) { // una provincia por comunidad (la que haga de comunidad en la pregunta)
-      const vistas = {}; base = shuffle(base).filter(id => !vistas[P[id][3]] && (vistas[P[id][3]] = true));
-    } else { const b2 = base.filter(id => !SIN_BANDERA.includes(id) && !NO_SE_PREGUNTA.includes(id)); if (b2.length) base = b2; }
-  }
-  if (S.mode === "cap" && M.sinCap) { const b2 = base.filter(id => !M.sinCap.includes(id)); if (b2.length) base = b2; } // capitales en disputa: no se preguntan
-  if (S.mode === "cap" && capOnly() && !onlyIds) {
-    const distintas = base.filter(id => M.capIgual ? !M.capIgual.includes(id) : !P[id][2].startsWith(P[id][0]));
-    if (distintas.length) base = distintas; else capAviso = true;
-  }
+  const q = preguntasDe(S.mode, onlyIds);
+  S.pool = q.pool; let base = q.base;
+  const { capAviso, gentAviso, shapeAviso } = q;
   S.queue = shuffle(base);
-  S.total = S.queue.length;
+  S.total = S.n0 = S.queue.length;
+  if (S.mode === "duel") S.rounds = Math.max(1, Math.round(S.total / 2));
   S.pts = [0, 0]; S.turn = 0; S.qn = 0;
   provAll.classed("p1 p2", false); $("#shapebox").hidden = true; $("#flagbox").hidden = true;
   S.results = {}; S.requeued = {}; S.errors = 0; S.hits = 0; S.score = 0; S.streak = 0; S.best = 0; S.cur = null; S.review = !!onlyIds;
@@ -1833,6 +1847,7 @@ function newGame(onlyIds) {
   $("#qcard").hidden = explore; $("#statcard").hidden = explore; $("#infocard").hidden = !explore;
   document.body.classList.toggle("mode-explore", explore);
   if (typeof onResize === "function") onResize();
+  if (typeof renderCuantas === "function") renderCuantas();
   if (explore) { $("#i-name").textContent = tx("Toca una provincia", "Toca un país"); $("#i-cap").textContent = "—"; $("#i-ccaa").textContent = "—"; $("#i-flag").hidden = true; $("#i-fnote").hidden = true; return; }
   S.t0 = Date.now();
   const timed = S.mode === "time";
@@ -1844,11 +1859,9 @@ function newGame(onlyIds) {
   $("#skip").textContent = $("#skip2").textContent = timed ? "Saltar" : duel ? "Pasar" : "Ver respuesta";
   $(".bigscore").hidden = duel; $("#e-share").hidden = duel;
   $("#t-ok").parentNode.classList.toggle("duel1", duel); $("#t-bad").parentNode.classList.toggle("duel2", duel);
-  if (timed) {
-    S.tEnd = Date.now() + TIEMPO;
-    S.timer = setInterval(tickClock, 200); tickClock();
-  }
-  next();
+  if (timed) cuentaAtras(); // 5 · 3, 2, 1 antes de que empiece a correr el reloj
+  else next();
+  explicar();
   if (shapeAviso) toast(null, "Las islas de esta zona son tan pequeñas que no tienen silueta: juegas con todo el mapa", "warn", 3600);
   if (gentAviso) toast(null, "Las provincias de Canarias no tienen gentilicio propio: juegas con toda España", "warn", 3600);
   if (capAviso) toast(null, tx("En esta zona todas las capitales se llaman como su provincia", "En esta zona todas las capitales se llaman como su país"), "warn", 3200);
@@ -1921,13 +1934,13 @@ function next() {
   if (S.mode !== "duel") $("#target").style.background = "";
   const tg = $("#target"); tg.classList.remove("swap"); void tg.offsetWidth; tg.classList.add("swap");
   $("#skip2").textContent = S.mode === "time" ? "Saltar" : S.mode === "duel" ? "Pasar" : "Ver respuesta";
-  const n = S.total - S.queue.length;
+  const n = hechas() + 1;
   if (S.mode === "time") { announce("Encuentra " + nm); renderStats(); return; }
   if (S.mode === "duel") { announce("Turno de " + jug(S.turn) + ". Encuentra " + nm); renderStats(); return; }
   if (S.mode === "gent") { announce("¿Dónde viven los " + S.gentTxt + "?"); renderStats(); return; }
   if (S.mode === "shape") { announce(tx("¿Qué provincia", "¿Qué país") + " tiene esta forma? Opciones con las teclas 1 a 4."); renderStats(); return; }
   if (S.mode === "flag") { announce($("#prompt").textContent + " Bandera " + bandera(S.cur) + ". Opciones con las teclas 1 a 4."); renderStats(); return; }
-  announce("Pregunta " + n + " de " + S.total + ". " + (S.mode === "find" ? "Encuentra " + nm :
+  announce("Pregunta " + Math.min(n, S.n0) + " de " + S.n0 + ". " + (S.mode === "find" ? "Encuentra " + nm :
     S.mode === "cap" ? tx("¿En qué provincia está ", "¿En qué país está ") + cap + "?" : tx("¿Qué provincia está marcada?", "¿Qué país está marcado?") + " Opciones con las teclas 1 a 4."));
   renderStats();
 }
@@ -1977,6 +1990,50 @@ function hintRegion() {
 }
 
 const TIEMPO = 60000;
+// 5.1 · Contrarreloj: cuenta atrás de 3 segundos; el reloj y la primera pregunta llegan después
+function cuentaAtras() {
+  S.locked = true; S.cur = null;
+  $("#clockN").textContent = TIEMPO / 1000; $("#clock").classList.remove("low"); $("#bar").style.width = "100%";
+  $("#prompt").textContent = "Prepárate"; $("#target").textContent = "3"; $("#sub").textContent = "";
+  $("#s-done").textContent = "0"; $("#s-score").textContent = "0"; $("#s-streak").textContent = "0";
+  const pon = n => { $("#cuentaN").textContent = n; $("#target").textContent = n; announce(String(n)); };
+  $("#cuenta").hidden = false; pon(3);
+  later(() => pon(2), 1000); later(() => pon(1), 2000); later(empezarReloj, 3000);
+}
+function empezarReloj() {
+  $("#cuenta").hidden = true;
+  S.tEnd = Date.now() + TIEMPO;
+  clearInterval(S.timer); S.timer = setInterval(tickClock, 200); tickClock();
+  next();
+}
+// 5.1 · «Cómo se juega», con un ejemplo de la propia partida: las tres primeras veces de cada juego, hasta la primera respuesta
+function explicar() {
+  const k = "atlas:howto:" + S.mode, veces = store.get(k) || 0, el = $("#howto");
+  el.hidden = true;
+  if (S.mode === "explore" || veces >= 3) return;
+  const lo = U.art === "el" ? "lo" : "la", cur = S.cur && P[S.cur];
+  const t = {
+    find: "toca en el mapa " + U.art + " " + U.uno + " que te pedimos" + (cur ? " (ahora, " + cur[0] + ")" : "") + ". Si no " + lo + " encuentras, pulsa «Ver respuesta».",
+    name: "mira " + U.art + " " + U.uno + " marcad" + (U.art === "el" ? "o" : "a") + " en el mapa y elige su nombre en los botones de abajo.",
+    cap: "te decimos una capital" + (cur ? " (ahora, " + cur[2] + ")" : "") + " y tocas su " + U.uno + " en el mapa.",
+    gent: "te decimos cómo se llaman sus habitantes" + (S.gentTxt ? " (ahora, «" + S.gentTxt + "»)" : "") + " y tocas su " + U.uno + " en el mapa.",
+    shape: "mira la silueta y elige abajo de qué " + U.uno + " es.",
+    flag: "mira la bandera y elige abajo de qué " + U.uno + " es.",
+    time: "toca en el mapa todas " + (U.art === "el" ? "los que puedas" : "las que puedas") + " en 60 segundos. Si no ves " + (U.art === "el" ? "uno" : "una") + ", pulsa «Saltar».",
+    duel: "por turnos, cada uno busca " + (U.art === "el" ? "el suyo" : "la suya") + " en el mapa y pasa el móvil al otro. " + S.rounds + (S.rounds === 1 ? " ronda" : " rondas") + " cada uno; gana quien acierte más."
+  }[S.mode];
+  if (!t) return;
+  $("#howtoTxt").textContent = t; el.hidden = false;
+  store.set(k, veces + 1);
+}
+// 10 · La primera vez que se falla una provincia pequeña en una pantalla táctil, se explica cómo acercar el mapa
+function avisoZoom() {
+  if (store.get("atlas:avisoZoom") || !matchMedia("(pointer: coarse)").matches || !S.cur || !byId[S.cur] || curK > 1.8) return;
+  const r = byId[S.cur].getBoundingClientRect();
+  if (Math.max(r.width, r.height) > 32) return;
+  store.set("atlas:avisoZoom", true);
+  later(() => toast(null, "Consejo: <b>pellizca el mapa con dos dedos</b> para acercarlo", "warn", 4200), 1500);
+}
 function tickClock() {
   const left = Math.max(0, S.tEnd - Date.now()), s = Math.ceil(left / 1000);
   $("#clockN").textContent = s;
@@ -1994,7 +2051,7 @@ function answerTimed(id) {
     toast(id, "✓ " + name(id), "ok", 600);
     later(next, 350);
   } else {
-    S.errors++; S.streak = 0;
+    S.errors++; S.streak = 0; avisoZoom();
     if (!S.results[S.cur]) S.results[S.cur] = "bad";
     Sound.play("bad");
     const qc = $("#qcard"); qc.classList.remove("shake"); void qc.offsetWidth; qc.classList.add("shake");
@@ -2073,7 +2130,7 @@ function answer(id, btn) {
   if (S.tries < 3) Sound.play("bad");
   const qc = $("#qcard"); qc.classList.remove("shake"); void qc.offsetWidth; qc.classList.add("shake");
   if (btn) { btn.classList.add("bad"); btn.disabled = true; }
-  else { cls(id, "flash-bad"); toast(id, "Eso es " + name(id) + (S.mode === "gent" && (CA ? GENT_CA : GENT)[id] ? " (" + gents(id).join(" o ") + ")" : ""), "bad", 1400); setTimeout(() => cls(id, "flash-bad", false), 1400); }
+  else { avisoZoom(); cls(id, "flash-bad"); toast(id, "Eso es " + name(id) + (S.mode === "gent" && (CA ? GENT_CA : GENT)[id] ? " (" + gents(id).join(" o ") + ")" : ""), "bad", 1400); setTimeout(() => cls(id, "flash-bad", false), 1400); }
   if (S.tries === 1) memUpdate(S.cur, false);
   if (S.tries >= 3) return reveal();
   fb.className = "feedback bad";
@@ -2100,7 +2157,7 @@ function reveal() {
   $("#feedback").textContent = "Era " + nm + (nm !== cap && !FCA() ? " (capital: " + cap + ")" : "") + ". Volverá a salir más adelante." +
     (S.mode === "flag" ? " Su bandera: " + bandera(S.cur) + "." : "");
   // Repetición: vuelve a la cola unas preguntas más tarde, una sola vez
-  if (!S.requeued[S.cur]) { S.requeued[S.cur] = true; S.queue.splice(Math.min(3, S.queue.length), 0, S.cur); S.total++; }
+  if (!S.requeued[S.cur]) { S.requeued[S.cur] = true; S.queue.splice(Math.min(3, S.queue.length), 0, S.cur); S.total++; } // S.total cuenta preguntas; lo que se ve es S.n0
   renderStats();
   later(next, 2600);
 }
@@ -2113,9 +2170,14 @@ function countUp(el, to, ms) {
   requestAnimationFrame(tick);
 }
 function fmt(ms) { const s = Math.floor(ms / 1000); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }
+// 5.1 · Hechas: las que ya no van a volver a salir. El total no cambia aunque una provincia fallada vuelva a la cola
+function hechas() {
+  const quedan = new Set(S.queue); if (S.cur && !S.locked) quedan.add(S.cur);
+  return Math.max(0, (S.n0 || 0) - quedan.size);
+}
 function renderStats() {
-  const done = S.total - S.queue.length - (S.cur && !S.locked ? 1 : 0);
-  $("#s-done").textContent = S.mode === "time" ? S.hits : Math.max(0, done) + "/" + S.total;
+  const done = hechas();
+  $("#s-done").textContent = S.mode === "time" ? S.hits : done + "/" + S.n0;
   $("#s-score").textContent = S.mode === "duel" ? S.pts[1] : S.score;
   $("#s-streak").textContent = S.mode === "duel" ? Math.min(S.rounds, Math.ceil(S.qn / 2)) + "/" + S.rounds : S.streak;
   if (S.mode === "duel") $("#s-done").textContent = S.pts[0];
@@ -2123,9 +2185,10 @@ function renderStats() {
   sb.hidden = S.streak < 3 || !S.cur || S.mode === "time" || S.mode === "duel";
   $("#streakN").textContent = S.streak;
   sb.classList.toggle("hot", S.streak >= 10);
-  const pct = S.total ? Math.round(Math.max(0, done) / S.total * 100) : 0;
+  const pct = S.n0 ? Math.round(done / S.n0 * 100) : 0;
   if (S.mode !== "time") $("#bar").style.width = pct + "%";
   $("#progress").setAttribute("aria-valuenow", pct);
+  if (S.hits + S.errors > 0 || (S.mode === "duel" && S.qn > 1)) $("#howto").hidden = true; // tras la primera respuesta ya no hace falta
   $("#restart").hidden = !(S.hits + S.errors > 0 || Object.keys(S.results).length > 0 || (S.mode === "duel" && S.qn > 1));
 }
 
@@ -2345,6 +2408,7 @@ document.querySelectorAll(".modes button[data-mode]").forEach(b => b.addEventLis
   pressMode(b.dataset.mode);
   S.mode = b.dataset.mode; store.set("atlas:mode", S.mode);
   if (PRACTICA.includes(S.mode)) { ultimaPractica = S.mode; store.set(KP + "practica", S.mode); }
+  if (JUEGOS.includes(S.mode)) store.set("atlas:juego", S.mode); // lo que empezará el botón grande la próxima vez
   renderModeExtras(); newGame();
   // En el móvil, tocar un modo lo empieza (Duelo espera a que se pongan los nombres)
   if (S.mode === "duel") { $("#sheetPlay").textContent = "Empezar"; $("#restart2").hidden = true; }
@@ -2363,7 +2427,9 @@ function pintarMiniMapa() {
   c.removeAttribute("id"); c.removeAttribute("tabindex"); c.removeAttribute("role"); c.removeAttribute("aria-label"); c.removeAttribute("aria-roledescription");
   c.setAttribute("aria-hidden", "true"); c.setAttribute("focusable", "false");
   c.querySelectorAll(".kfocus,.hit,.miss,.flash").forEach(e => e.classList.remove("kfocus", "hit", "miss", "flash"));
-  box.replaceChildren(c);
+  const chip = document.createElement("span"); chip.className = "mm-chip";
+  chip.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.2 15.2L20.5 20.5"/></svg>Toca para explorar el mapa<span class="sr-only"> (sin preguntas)</span>';
+  box.replaceChildren(c, chip);
   // Encuadra las provincias de la zona, medidas sobre la propia copia
   try {
     const m = c.getScreenCTM().inverse(); let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
@@ -2377,25 +2443,38 @@ function pintarMiniMapa() {
   } catch (e) {}
 }
 
-// ---------- 3.2 · Pestañas Aprender / Practicar / Jugar ----------
-const TAB_OF = { explore: "aprender", find: "practicar", name: "practicar", cap: "practicar", gent: "practicar", shape: "practicar", flag: "practicar", time: "jugar", duel: "jugar" };
-const tabs = [...document.querySelectorAll('.seg [role="tab"]')];
-function showTab(t, focus) {
-  tabs.forEach(b => {
-    const on = b.dataset.tab === t;
-    b.setAttribute("aria-selected", on); b.tabIndex = on ? 0 : -1;
-    $("#grp-" + b.dataset.tab).hidden = !on;
-    if (on && focus) b.focus();
-  });
+// ---------- 5.1 · Sin pestañas: una sola lista de juegos, de fácil a difícil, y un botón grande para empezar ----------
+// El botón empieza el último juego que se usó (la primera vez, «Encuéntrala»); el Duelo no, porque pide los nombres
+const JUEGOS = ["find", "name", "cap", "gent", "flag", "shape", "time"];
+function juegoInicial() {
+  const g = store.get("atlas:juego");
+  return JUEGOS.includes(g) && !document.querySelector('.modes button[data-mode="' + g + '"]').hidden ? g : "find";
 }
-tabs.forEach((b, i) => {
-  b.addEventListener("click", () => showTab(b.dataset.tab));
-  b.addEventListener("keydown", e => {
-    const k = { ArrowLeft: -1, ArrowRight: 1 }[e.key];
-    if (k) { e.preventDefault(); showTab(tabs[(i + k + tabs.length) % tabs.length].dataset.tab, true); }
-    else if (e.key === "Home" || e.key === "End") { e.preventDefault(); showTab(tabs[e.key === "Home" ? 0 : tabs.length - 1].dataset.tab, true); }
+const nombreJuego = m => { const b = $('.modes button[data-mode="' + m + '"]'); return b ? b.querySelector("b").textContent : ""; };
+function cuantas(m) {
+  if (m === "time") return "60 segundos";
+  const n = preguntasDe(m).base.length;
+  if (m === "duel") { const r = Math.max(1, Math.round(n / 2)); return r + (r === 1 ? " ronda" : " rondas") + " cada uno"; }
+  return n + " " + (n === 1 ? U.uno : U.unos);
+}
+// 3 · Cuántas preguntas tiene cada juego, a la vista antes de empezar
+function renderCuantas() {
+  document.querySelectorAll(".modes button[data-mode] .dif").forEach(d => {
+    const m = d.parentNode.dataset.mode;
+    if (d.dataset.base === undefined) d.dataset.base = d.textContent;
+    if (m === "time") return; // «60 segundos» ya va en su descripción
+    d.textContent = (d.dataset.base ? d.dataset.base + " · " : "") + cuantas(m);
   });
-});
+  const g = juegoInicial();
+  $("#startTxt").textContent = nombreJuego(g) + " · " + ZN(S.region) + " · " + cuantas(g);
+}
+function empezarJuego(m) {
+  const b = $('.modes button[data-mode="' + m + '"]');
+  if (b) b.click();
+}
+$("#startBtn").addEventListener("click", () => empezarJuego(juegoInicial()));
+// 11 · El mapa de la portada se puede tocar: lleva a Explorar
+$("#miniMap").addEventListener("click", () => empezarJuego("explore"));
 
 // ---------- 3.2 · Zona arriba, con su propia ventana para elegirla ----------
 const zoneName = ZN;
@@ -2456,7 +2535,7 @@ if (EU) {
   $("#sinPeq").addEventListener("change", e => {
     store.set(KP + "sinPeq", e.target.checked);
     $("#zoneGrid").querySelectorAll("button").forEach(b => b.querySelector(".zc").textContent = zoneCount(b.dataset.zone));
-    if (!enCurso()) newGame();
+    if (!enCurso()) newGame(); else renderCuantas();
     setTimeout(pintarMiniMapa, 50);
     announce(e.target.checked ? "Sin países pequeños." : "Con todos los países.");
   });
@@ -2465,19 +2544,20 @@ $("#setcard").addEventListener("transitionend", e => { if (e.target.id === "setc
 $("#tbZone").addEventListener("click", openZones);
 // Barra superior de la partida: «Inicio» vuelve a la pantalla de inicio; al lado, el modo en que estás
 $("#tbHome").addEventListener("click", () => openSheet(false));
-function renderTopTabs() { const b = $('.modes button[data-mode="' + S.mode + '"]'); $("#tbMode").textContent = b ? b.querySelector("b").textContent : ""; }
+function renderTopTabs() { $("#tbMode").textContent = nombreJuego(S.mode); }
 // ---------- 3.6 · Partida a medias: tarjeta «Seguir», progreso en su modo y «Empezar de nuevo» con aviso ----------
 function progreso() {
   const n = Object.keys(S.results).length;
   if (S.mode === "time") return { txt: S.hits + (S.hits === 1 ? " acierto" : " aciertos"), f: 0 };
   if (S.mode === "duel") return { txt: "Ronda " + Math.min(S.rounds, Math.ceil(S.qn / 2)) + " de " + S.rounds, f: S.rounds ? Math.min(1, Math.ceil(S.qn / 2) / S.rounds) : 0 };
-  const done = Math.max(0, S.total - S.queue.length - (S.cur && !S.locked ? 1 : 0));
-  return { txt: done + "/" + S.total, f: S.total ? done / S.total : 0, n };
+  const done = hechas();
+  return { txt: done + "/" + S.n0, f: S.n0 ? done / S.n0 : 0, n };
 }
 function renderResume() {
   const on = enCurso();
   document.querySelectorAll(".modes .prog").forEach(e => e.remove());
   $("#resumeCard").hidden = !on || !mqMobile.matches;
+  $("#startBtn").hidden = on && mqMobile.matches; // con una partida a medias, manda «Seguir con tu partida»
   $("#restartLink").hidden = !on || !mqMobile.matches || mqHome.matches; // en el móvil vertical ya está en la barra de arriba
   if (!on) return;
   const p = progreso(), b = $('.modes button[data-mode="' + S.mode + '"]'), modo = b ? b.querySelector("b").textContent : "";
@@ -2571,11 +2651,10 @@ function openSheet(first) {
   const seguir = !first && enCurso();
   $("#sheetPlay").textContent = seguir ? "Seguir jugando" : "Empezar";
   $("#restart2").hidden = !seguir;
-  if (TAB_OF[S.mode]) showTab(TAB_OF[S.mode]);
   renderResume();
   lastFocus = document.activeElement;
   document.body.classList.add("sheet-open"); $("#backdrop").hidden = false;
-  setTimeout(() => { const b = $("#setcard").querySelector('.modes [aria-pressed="true"]'); if (b) b.focus({ preventScroll: true }); }, 60);
+  setTimeout(() => { const b = [$("#resumeCard"), $("#startBtn")].find(x => !x.hidden) || $("#setcard").querySelector('.modes [aria-pressed="true"]'); if (b) b.focus({ preventScroll: true, focusVisible: false }); }, 60);
 }
 function closeSheet() {
   if (!document.body.classList.contains("sheet-open")) return;
@@ -2673,13 +2752,12 @@ $("#m-due").addEventListener("click", () => {
   toast(null, "Repaso del día: <b>" + ids.length + "</b> " + tx("provincias", "países") + " que se te resisten", "ok", 2600);
 });
 $("#flagCa").checked = store.get("atlas:flagCa") === true;
-$("#flagCa").addEventListener("change", () => { store.set("atlas:flagCa", $("#flagCa").checked); if (S.mode === "flag") newGame(); });
+$("#flagCa").addEventListener("change", () => { store.set("atlas:flagCa", $("#flagCa").checked); if (S.mode === "flag") newGame(); else renderCuantas(); });
 $("#capOnly").checked = store.get("atlas:capOnly") !== false;
-$("#capOnly").addEventListener("change", () => { store.set("atlas:capOnly", capOnly()); if (S.mode === "cap") newGame(); });
+$("#capOnly").addEventListener("change", () => { store.set("atlas:capOnly", capOnly()); if (S.mode === "cap") newGame(); else renderCuantas(); });
 function renderModeExtras() {
   $("#capOnlyRow").hidden = S.mode !== "cap"; $("#duelRow").hidden = S.mode !== "duel"; $("#flagCaRow").hidden = EU || CA || S.mode !== "flag";
   $("#modeOpts").hidden = S.mode !== "cap" && S.mode !== "duel" && (EU || CA || S.mode !== "flag"); // la zona ya va arriba
-  if (TAB_OF[S.mode]) showTab(TAB_OF[S.mode]);
   renderTopTabs();
   const b = $('.modes button[data-mode="' + S.mode + '"]');
   $("#optsTitle").textContent = "Opciones · " + (b ? b.querySelector("b").textContent : "");
@@ -2712,6 +2790,7 @@ if (M.capTxt) $("#capOnlyTxt").textContent = M.capTxt + (M.sinCap ? ". Israel y 
 $("#shareDl").setAttribute("download", M.archivo);
 if (EU) {
   $("#m-gent").hidden = true;
+  $("#duelReglas").textContent = "Por turnos: cada uno busca el suyo en el mapa y pasa el móvil al otro. Gana quien acierte más.";
   $(".mapwrap").setAttribute("aria-label", "Mapa de " + M.cont);
   $("#map").setAttribute("aria-label", "Mapa de países de " + M.cont + ". Flechas para moverte entre países, Intro para elegir, más y menos para acercar o alejar.");
   $("#regionLabel").textContent = $("#regionChip").textContent = M.cont;
@@ -2759,8 +2838,8 @@ if (savedMode && document.querySelector('[data-mode="' + savedMode + '"]:not([hi
   pressMode(savedMode);
 }
 if (savedRegion && REGIONS.some(r => r[0] === savedRegion)) { S.region = savedRegion; sel.value = savedRegion; }
-// Primera visita en escritorio: se empieza explorando el mapa, con el menú de modos a la vista
-if (!savedMode && !mqMobile.matches) { S.mode = "explore"; pressMode("explore"); }
+// 5.1 · Primera visita, en el móvil y en el ordenador por igual: se empieza explorando el mapa, con «Empezar a jugar» a la vista
+if (!savedMode) { S.mode = "explore"; pressMode("explore"); }
 renderModeExtras();
 newGame();
 // En el móvil en vertical la app se abre siempre en la pantalla de inicio; en el resto, solo la primera vez
@@ -2818,6 +2897,11 @@ if (mqHome.matches || (!savedMode && mqMobile.matches)) openSheet(true);
 (function () {
   const VERSION = document.querySelector('meta[name="app-version"]').content;
   const NOVEDADES = [
+    ["5.1", ["▶️ Botón grande «Empezar a jugar» en la portada",
+             "📋 Una sola lista de juegos, de fácil a difícil, con cuántas preguntas tiene cada uno",
+             "💡 «Cómo se juega», con un ejemplo, las primeras veces de cada juego; y 3, 2, 1 antes de Contrarreloj",
+             "🗺️ Toca el mapa de la portada para explorarlo; el mapa se elige solo arriba",
+             "🛠️ El total de la partida ya no cambia al repetir una provincia fallada"]],
     ["5.0.2", ["🛠️ Duelo en el móvil: al elegirlo se ven los nombres y el botón para empezar, sin salirse de la pantalla"]],
     ["5.0.1", ["🛠️ Arreglado: en Banderas de España, debajo de la bandera ya no pregunta por un «país»",
              "🛠️ Gentilicios en el mapa de comunidades: «Toca su comunidad»",

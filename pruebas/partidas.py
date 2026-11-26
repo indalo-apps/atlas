@@ -12,6 +12,7 @@ async () => {
   for (const m of modos) {
     try {
       S.mode = m; pressMode(m); newGame(); flush();
+      if (m === 'time') { empezarReloj(); flush(); } // sin esperar la cuenta atrás
       let n = 0, guard = 0;
       while (S.cur && !$('#endcard').hidden === false && guard++ < 400) {
         if (!$('#endcard').hidden) break;
