@@ -1,7 +1,7 @@
 // © 2026 Adela Moreno Vega y Carlos Moreno Otto. Todos los derechos reservados.
 // Service worker del Atlas de Provincias: guarda el juego para usarlo sin conexión.
 // Al subir una versión nueva, cambia el nombre de la caché y se borra la anterior.
-const CACHE = "atlas-v4.0-20261126";
+const CACHE = "atlas-v4.1-20261126";
 const ARCHIVOS = [
   "./",
   "index.html",
@@ -52,7 +52,7 @@ self.addEventListener("fetch", e => {
   }
   // Librerías, tipografías, iconos y banderas: la copia guardada y, si no está, internet (y se guarda para la próxima vez)
   e.respondWith(caches.match(req, { ignoreSearch: true }).then(r => r || fetch(req).then(r2 => {
-    if (r2.ok && /\/banderas\/[a-z]{2}\.svg$/.test(new URL(req.url).pathname)) { const copia = r2.clone(); caches.open(CACHE).then(c => c.put(req, copia)); }
+    if (r2.ok && /\/banderas\/(es\/)?[a-z0-9-]+\.(svg|webp)$/.test(new URL(req.url).pathname)) { const copia = r2.clone(); caches.open(CACHE).then(c => c.put(req, copia)); }
     return r2;
   })));
 });

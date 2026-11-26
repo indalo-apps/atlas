@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="4.0">
+<meta name="app-version" content="4.1">
 <title>Atlas de Provincias</title>
 <meta name="author" content="Adela Moreno Vega y Carlos Moreno Otto">
 <meta name="copyright" content="© 2026 Adela Moreno Vega y Carlos Moreno Otto. Todos los derechos reservados.">
@@ -860,6 +860,10 @@ const IK = (function(){
           <label for="p2n">Jugador 2<input id="p2n" maxlength="14" autocomplete="off" placeholder="Jugador 2"></label>
           <button type="button" class="btn primary mobile-only" id="duelGo">Empezar duelo</button>
         </div>
+        <label class="check" id="flagCaRow" for="flagCa" hidden>
+          <input type="checkbox" id="flagCa">
+          <span>Banderas de las comunidades autónomas<small>En lugar de las de las provincias</small></span>
+        </label>
         <label class="check" id="capOnlyRow" for="capOnly" hidden>
           <input type="checkbox" id="capOnly" checked>
           <span>Solo capitales con nombre distinto<small id="capOnlyTxt">Oviedo, Santander, Bilbao, San Sebastián, Vitoria-Gasteiz, Pamplona, Logroño y Palma</small></span>
@@ -1113,7 +1117,10 @@ const PARECIDAS = [["FR", "NL", "LU", "RU", "SK", "SI", "RS", "HR"], ["RO", "AD"
   ["KR", "JP", "BD", "PW", "LA"], ["TH", "CR", "KH", "LA", "KP"], ["MY", "LR", "US"], ["AM", "CO", "GA", "SL", "MU"], ["AZ", "UZ", "SL", "TM"],
   ["ML", "GN", "SN", "CM", "BJ", "GH", "ET", "BO", "LT"], ["TD", "RO", "AD", "MD"], ["GM", "SL", "KE", "SS", "MW"], ["BF", "MG", "BJ", "GW", "SR"],
   ["AU", "NZ", "TV", "FJ"], ["SO", "FM", "VN"], ["DJ", "TL", "CU", "ST", "MZ", "SS", "PS", "JO"], ["ZA", "ZW", "KM", "SC", "MU"],
-  ["CG", "TZ", "SB", "NA", "CD", "MH", "KN"], ["LB", "CA", "PE", "AT"], ["WS", "TO", "TW", "MM"], ["BW", "AR", "SV", "HN"], ["KZ", "PW", "UA", "SO"]];
+  ["CG", "TZ", "SB", "NA", "CD", "MH", "KN"], ["LB", "CA", "PE", "AT"], ["WS", "TO", "TW", "MM"], ["BW", "AR", "SV", "HN"], ["KZ", "PW", "UA", "SO"],
+  // Provincias de España
+  ["04", "22", "50", "44"], ["08", "17", "25", "07", "43"], ["05", "13", "40", "31", "43"], ["09", "19", "42", "34", "14"], ["01", "02", "24", "37", "47", "48", "30"],
+  ["06", "32", "29", "21", "33"], ["27", "35", "36", "38", "39"], ["11", "18", "23", "41"], ["10", "45", "16", "49"], ["51", "52", "20", "28"]];
 // Descripción de cada bandera: se lee con el lector de pantalla y se enseña al responder (no depende solo del color)
 const BANDERA = {
   ES: "franjas horizontales roja, amarilla (el doble de ancha) y roja, con el escudo", PT: "verde a la izquierda y roja a la derecha, con el escudo sobre una esfera armilar",
@@ -1212,8 +1219,58 @@ const BANDERA = {
   WS: "roja, con un rectángulo azul arriba a la izquierda con cinco estrellas blancas", TO: "roja, con un rectángulo blanco arriba a la izquierda con una cruz roja",
   TV: "azul celeste, con la Union Jack arriba a la izquierda y nueve estrellas amarillas",
 };
-const flagSrc = id => "banderas/" + id.toLowerCase() + ".svg";
-const name = id => P[id][0];
+// 4.1 · Banderas de España: las de las provincias (banderas/es/<id>.svg) y las de las comunidades (banderas/es/ca-<n>.svg)
+// Alicante, Castellón, Valencia, Lleida y A Coruña no tienen bandera provincial oficial: no salen en Banderas
+const SIN_BANDERA = ["03", "12", "46", "25", "15"];
+const CA_N = { "Andalucía": "01", "Aragón": "02", "Principado de Asturias": "03", "Illes Balears": "04", "Canarias": "05", "Cantabria": "06", "Castilla y León": "07",
+  "Castilla-La Mancha": "08", "Cataluña": "09", "Comunitat Valenciana": "10", "Extremadura": "11", "Galicia": "12", "Comunidad de Madrid": "13", "Región de Murcia": "14",
+  "Navarra": "15", "País Vasco": "16", "La Rioja": "17", "Ciudad autónoma de Ceuta": "18", "Ciudad autónoma de Melilla": "19" };
+const flagCa = () => !EU && $("#flagCa").checked; // en Banderas de España, ¿se preguntan las comunidades?
+const FCA = () => S.mode === "flag" && flagCa();
+// Descripción de cada bandera de España (comunidades y provincias), para el lector de pantalla y al responder
+const BANDERA_CA = {
+  "01": "franjas horizontales verde, blanca y verde, con el escudo de Hércules y dos leones", "02": "cuatro barras rojas sobre amarillo, con el escudo de Aragón",
+  "03": "azul, con la Cruz de la Victoria amarilla", "04": "cinco franjas rojas sobre amarillo, con un castillo blanco sobre morado arriba a la izquierda",
+  "05": "franjas verticales blanca, azul y amarilla, con el escudo de los perros", "06": "mitad de arriba blanca y mitad de abajo roja, con el escudo en el centro",
+  "07": "cuartelada: castillos dorados sobre rojo y leones morados sobre blanco", "08": "partida en vertical: un castillo dorado sobre granate a la izquierda y blanca a la derecha",
+  "09": "cuatro barras rojas sobre amarillo (la senyera)", "10": "cuatro barras rojas sobre amarillo, con una franja azul con coronas junto al asta",
+  "11": "franjas horizontales verde, blanca y negra, con el escudo en el centro", "12": "blanca, con una franja diagonal azul celeste y el escudo del cáliz",
+  "13": "roja, con siete estrellas blancas de cinco puntas", "14": "granate, con cuatro castillos dorados arriba a la izquierda y siete coronas abajo a la derecha",
+  "15": "roja, con el escudo de las cadenas doradas y la corona", "16": "roja, con un aspa verde y una cruz blanca encima (la ikurriña)",
+  "17": "franjas horizontales roja, blanca, verde y amarilla, con el escudo en el centro", "18": "ocho triángulos blancos y negros que salen del centro, con el escudo de Portugal",
+  "19": "azul celeste, con el escudo de la ciudad en el centro",
+};
+const BANDERA_ES = {
+  "01": "carmesí, con el escudo coronado en el centro", "02": "granate, con el escudo coronado en el centro",
+  "04": "blanca, con una cruz roja y el escudo en el centro", "05": "roja, con el escudo en el centro",
+  "06": "azul, con el escudo del león en el centro", "07": BANDERA_CA["04"],
+  "08": "cuatro barras rojas sobre amarillo, con un rombo blanco con una cruz roja", "09": "morada, con el escudo en el centro",
+  "10": "partida: un león rojo sobre morado a la izquierda y un castillo dorado sobre blanco a la derecha", "11": "verde, con un borde de castillos y leones y el escudo de las columnas de Hércules",
+  "13": "roja, con el escudo en el centro", "14": "morada oscura, con el escudo del león en el centro",
+  "16": "franjas horizontales amarilla, blanca y roja, con el escudo en el centro", "17": "cuatro barras rojas sobre amarillo, con el escudo de cuadros y una corona de laurel",
+  "18": "verde oliva, con el escudo de la granada en el centro", "19": "morada, con el escudo en el centro",
+  "20": "blanca, con el escudo de los tres árboles sostenido por dos salvajes", "21": "azul, con dos escudos coronados en el centro",
+  "22": "blanca, con una cruz roja y el escudo en el centro", "23": "verde, con el escudo en el centro",
+  "24": "granate, con el escudo del león en el centro", "25": "cuatro barras rojas sobre amarillo, con un rombo azul con tres flores de lis",
+  "26": BANDERA_CA["17"], "27": "mitad de arriba azul y mitad de abajo roja, con el escudo en el centro",
+  "28": BANDERA_CA["13"], "29": "azul celeste, con un rectángulo blanco con el escudo en el centro",
+  "30": BANDERA_CA["14"], "31": BANDERA_CA["15"],
+  "32": "azul, con el escudo del puente y una fila de puntos blancos a la derecha", "33": BANDERA_CA["03"],
+  "34": "morada, con el escudo negro y dorado en el centro", "35": "azul a la izquierda y blanca a la derecha, con el escudo en el centro",
+  "36": "partida en diagonal, blanca arriba y azul abajo, con el escudo en el centro", "37": "granate, con el escudo en el centro",
+  "38": "azul oscuro, con una cruz blanca en aspa y el escudo en el centro", "39": BANDERA_CA["06"],
+  "40": "roja, con el escudo en el centro", "41": "verde, con el escudo en el centro",
+  "42": "morada, con el escudo en el centro", "43": "roja, con el escudo de barras y el texto «Diputación Provincial de Tarragona»",
+  "44": "blanca, con una cruz roja y el escudo rodeado de laurel", "45": "carmesí, con el águila negra de dos cabezas y las columnas de Hércules",
+  "47": "granate, con el escudo dentro de un círculo verde", "48": "granate, con el escudo del árbol de Gernika",
+  "49": "ocho franjas rojas y una verde arriba, acabadas en picos (la Seña Bermeja)", "50": "blanca, con una cruz roja y el escudo en el centro",
+  "51": BANDERA_CA["18"], "52": BANDERA_CA["19"],
+};
+// Banderas de comunidades parecidas (números de CA_N)
+const PARECIDAS_CA = [["09", "04", "10", "02"], ["13", "15", "14", "16"], ["01", "11", "17", "12"], ["03", "19", "05"], ["06", "07", "08", "18"]];
+const flagSrc = id => EU ? "banderas/" + id.toLowerCase() + ".svg" : FCA() ? "banderas/es/ca-" + CA_N[P[id][3]] + ".webp" : "banderas/es/" + id + ".webp";
+const bandera = id => EU ? BANDERA[id] : FCA() ? BANDERA_CA[CA_N[P[id][3]]] : BANDERA_ES[id];
+const name = id => FCA() ? P[id][3].replace("Ciudad autónoma de ", "") : P[id][0];
 // Gentilicios de cada provincia (las dos de Canarias no tienen uno propio: se usa el de cada isla)
 const GENT = {
   "01": "alaveses|alavenses", "02": "albaceteños", "03": "alicantinos", "04": "almerienses", "05": "abulenses", "06": "pacenses|badajocenses",
@@ -1649,7 +1706,7 @@ function memUpdate(id, bien) {
   renderDue();
 }
 // El repaso es del último modo de práctica que se haya usado
-const PRACTICA = EU ? ["find", "name", "cap", "shape", "flag"] : ["find", "name", "cap", "gent", "shape"];
+const PRACTICA = EU ? ["find", "name", "cap", "shape", "flag"] : ["find", "name", "cap", "gent", "shape", "flag"];
 let ultimaPractica = PRACTICA.includes(store.get(KP + "practica")) ? store.get(KP + "practica") : "find";
 function dueIds(modo = ultimaPractica) {
   const m = (store.get(MEM_KEY) || {})[modo] || {}, ahora = Date.now() + 60e3;
@@ -1676,6 +1733,11 @@ function newGame(onlyIds) {
     S.rounds = Math.max(1, Math.min(10, Math.floor(base.length / 2)));
     base = shuffle(base).slice(0, S.rounds * 2);
     if (base.length < S.rounds * 2) base = base.concat(shuffle(ALL.filter(id => S.pool.includes(id))).slice(0, S.rounds * 2 - base.length));
+  }
+  if (S.mode === "flag" && !EU) {
+    if (flagCa()) { // una provincia por comunidad (la que haga de comunidad en la pregunta)
+      const vistas = {}; base = shuffle(base).filter(id => !vistas[P[id][3]] && (vistas[P[id][3]] = true));
+    } else { const b2 = base.filter(id => !SIN_BANDERA.includes(id)); if (b2.length) base = b2; }
   }
   if (S.mode === "cap" && AM && CF.sinCap) { const b2 = base.filter(id => !CF.sinCap.includes(id)); if (b2.length) base = b2; } // capitales en disputa: no se preguntan
   if (S.mode === "cap" && capOnly() && !onlyIds) {
@@ -1753,11 +1815,11 @@ function next() {
     $("#shapeSvg").setAttribute("viewBox", [b[0][0] - pad, b[0][1] - pad, b[1][0] - b[0][0] + 2 * pad, b[1][1] - b[0][1] + 2 * pad].join(" "));
     buildOptions();
   } else if (S.mode === "flag") {
-    $("#prompt").textContent = "¿De qué país es esta bandera?";
+    $("#prompt").textContent = tx(FCA() ? "¿De qué comunidad es esta bandera?" : "¿De qué provincia es esta bandera?", "¿De qué país es esta bandera?");
     $("#target").textContent = "¿?";
     $("#sub").textContent = "";
     $("#flagImg").src = flagSrc(S.cur);
-    $("#flagImg").alt = "Bandera " + BANDERA[S.cur];
+    $("#flagImg").alt = "Bandera " + bandera(S.cur);
     buildOptions();
   } else if (S.mode === "find" || S.mode === "time") {
     $("#prompt").textContent = "Busca en el mapa";
@@ -1784,7 +1846,7 @@ function next() {
   if (S.mode === "duel") { announce("Turno de " + jug(S.turn) + ". Encuentra " + nm); renderStats(); return; }
   if (S.mode === "gent") { announce("¿Dónde viven los " + S.gentTxt + "?"); renderStats(); return; }
   if (S.mode === "shape") { announce(tx("¿Qué provincia", "¿Qué país") + " tiene esta forma? Opciones con las teclas 1 a 4."); renderStats(); return; }
-  if (S.mode === "flag") { announce("¿De qué país es esta bandera? Bandera " + BANDERA[S.cur] + ". Opciones con las teclas 1 a 4."); renderStats(); return; }
+  if (S.mode === "flag") { announce($("#prompt").textContent + " Bandera " + bandera(S.cur) + ". Opciones con las teclas 1 a 4."); renderStats(); return; }
   announce("Pregunta " + n + " de " + S.total + ". " + (S.mode === "find" ? "Encuentra " + nm :
     S.mode === "cap" ? tx("¿En qué provincia está ", "¿En qué país está ") + cap + "?" : tx("¿Qué provincia está marcada?", "¿Qué país está marcado?") + " Opciones con las teclas 1 a 4."));
   renderStats();
@@ -1797,6 +1859,12 @@ function buildOptions() {
   const pareja = id => PARECIDAS.some(g => g.includes(id) && g.includes(S.cur));
   const cerca = S.mode === "flag" ? id => pareja(id) ? 0 : (NB[S.cur] && NB[S.cur].has(id)) || P[id][3] === P[S.cur][3] ? 1 : 2
     : id => (NB[S.cur] && NB[S.cur].has(id)) ? 0 : P[id][3] === P[S.cur][3] ? 1 : 2;
+  if (FCA()) { // comunidades: tres comunidades distintas de la buena, primero las de bandera parecida
+    const una = {}; ALL.forEach(id => { if (!una[P[id][3]]) una[P[id][3]] = id; });
+    const par = c => PARECIDAS_CA.some(g => g.includes(CA_N[c]) && g.includes(CA_N[P[S.cur][3]]));
+    const otras = shuffle(Object.keys(una).filter(c => c !== P[S.cur][3])).sort((a, b) => par(b) - par(a)).slice(0, 3).map(c => una[c]);
+    return pintarOpciones(shuffle(otras.concat(S.cur)));
+  }
   const rank = ids => shuffle(ids.filter(id => id !== S.cur)).sort((a, b) => cerca(a) - cerca(b));
   const enZona = rank(S.pool);
   let opts = enZona.filter(id => cerca(id) < 2).slice(0, 2);
@@ -1805,7 +1873,9 @@ function buildOptions() {
   if (opts.length < 3) { // zonas pequeñas: completar con provincias de alrededor de toda España
     opts = opts.concat(rank(ALL).filter(id => !opts.includes(id)).slice(0, 3 - opts.length));
   }
-  opts = shuffle(opts.concat(S.cur));
+  pintarOpciones(shuffle(opts.concat(S.cur)));
+}
+function pintarOpciones(opts) {
   const box = $("#options"); box.innerHTML = "";
   opts.forEach((id, i) => {
     const b = document.createElement("button");
@@ -1909,12 +1979,12 @@ function answer(id, btn) {
     const rp = gLbl.append("circle").attr("class", "ripple").attr("cx", oc[0]).attr("cy", oc[1]).attr("r", HOME[2] * 0.035 / curK);
     setTimeout(() => rp.remove(), 800);
     if (btn) btn.classList.add("ok");
-    const [nm, , cap] = P[S.cur];
+    const cap = P[S.cur][2], nm = name(S.cur);
     toast(S.cur, "✓ " + (S.mode === "cap" ? cap + " · " + nm : S.mode === "gent" ? nm + " · " + gents(S.cur).join(" o ") : nm) + " <b>+" + pts + "</b>", "ok", 1200);
     fb.className = "feedback ok";
     fb.innerHTML = numify((S.tries === 0 ? "¡Correcto! +" : "Bien, a la " + (S.tries + 1) + "ª. +") + pts +
-      (S.mode === "cap" ? ". " + cap + " es la capital de " + nm + "." : (nm !== cap ? ". Capital: " + cap + "." : ".")));
-    if (S.mode === "flag") { const ft = document.createElement("span"); ft.className = "flagtxt"; ft.textContent = "Bandera de " + nm + ": " + BANDERA[S.cur] + "."; fb.appendChild(ft); }
+      (S.mode === "cap" ? ". " + cap + " es la capital de " + nm + "." : (nm !== cap && !FCA() ? ". Capital: " + cap + "." : ".")));
+    if (S.mode === "flag") { const ft = document.createElement("span"); ft.className = "flagtxt"; ft.textContent = "Bandera de " + nm + ": " + bandera(S.cur) + "."; fb.appendChild(ft); }
     if (btn) $("#options").querySelectorAll("button").forEach(b => b.disabled = true);
     later(next, S.tries === 0 ? 1100 : 1600);
     return;
@@ -1928,6 +1998,7 @@ function answer(id, btn) {
   if (S.tries >= 3) return reveal();
   fb.className = "feedback bad";
   if (S.tries === 1) fb.textContent = btn ? "No es " + name(id) + ". Prueba otra vez." : "Eso es " + name(id) + ". Prueba otra vez.";
+  else if (FCA()) { fb.className = "feedback bad"; fb.textContent = "Tampoco. Te queda un intento."; }
   else { const c = hintRegion(); fb.className = "feedback warn"; fb.textContent = "Pista: está en " + c + " (zona marcada)."; later(() => toast(null, "Pista: está en <b>" + c + "</b>", "warn", 2400), btn ? 0 : 900); }
   renderStats();
 }
@@ -1944,10 +2015,10 @@ function reveal() {
   toast(null, "Era <b>" + name(S.cur) + "</b> · volverá a salir", "warn", 2400);
   if (OPT_MODES.includes(S.mode)) $("#options").querySelectorAll("button").forEach(b => { b.disabled = true; if (b.dataset.id === S.cur) b.classList.add("ok"); });
   $("#shapebox").hidden = true; $("#flagbox").hidden = true;
-  const [nm, , cap] = P[S.cur];
+  const cap = P[S.cur][2], nm = name(S.cur);
   $("#feedback").className = "feedback warn";
-  $("#feedback").textContent = "Era " + nm + (nm !== cap ? " (capital: " + cap + ")" : "") + ". Volverá a salir más adelante." +
-    (S.mode === "flag" ? " Su bandera: " + BANDERA[S.cur] + "." : "");
+  $("#feedback").textContent = "Era " + nm + (nm !== cap && !FCA() ? " (capital: " + cap + ")" : "") + ". Volverá a salir más adelante." +
+    (S.mode === "flag" ? " Su bandera: " + bandera(S.cur) + "." : "");
   // Repetición: vuelve a la cola unas preguntas más tarde, una sola vez
   if (!S.requeued[S.cur]) { S.requeued[S.cur] = true; S.queue.splice(Math.min(3, S.queue.length), 0, S.cur); S.total++; }
   renderStats();
@@ -2056,7 +2127,7 @@ function finish() {
     $(sel).textContent = v; $(sel + "-l").textContent = v === 1 ? uno : varios; $(sel).parentNode.classList.toggle("zero", !v);
   });
   $("#e-summary").innerHTML = numify((S.mode === "time" ? "En 60 segundos · " : "") + "Racha máxima: " + S.best);
-  const key = KP + S.mode + (S.mode === "cap" && capOnly() ? "-distintas" : "") + ":" + S.region;
+  const key = KP + S.mode + (S.mode === "cap" && capOnly() ? "-distintas" : "") + (FCA() ? "-comunidades" : "") + ":" + S.region;
   let rec = S.review ? null : store.get(key);
   if (!S.review) {
     const better = !rec || S.score > rec.score || (S.score === rec.score && ms < rec.ms);
@@ -2161,7 +2232,8 @@ function showInfo(id) {
   const [nm, alt, cap, ccaa] = P[id];
   $("#i-name").textContent = nm + (alt ? " / " + alt : "");
   $("#i-cap").textContent = cap; $("#i-ccaa").textContent = EU ? ccaa + (P[id][4] && EXTRA ? EXTRA.info : "") : ccaa;
-  if (EU) { $("#i-flag").src = flagSrc(id); $("#i-flag").alt = "Bandera de " + nm + ": " + BANDERA[id]; $("#i-flag").hidden = false; }
+  if (EU || !SIN_BANDERA.includes(id)) { $("#i-flag").src = flagSrc(id); $("#i-flag").alt = "Bandera de " + nm + ": " + bandera(id); $("#i-flag").hidden = false; }
+  else $("#i-flag").hidden = true; // sin bandera provincial oficial
   provAll.classed("selected", f => f.id === id);
   gLbl.selectAll("*").remove();
   if (!dotById[id] || (AM && curK < 3.5)) label(id, nm); // Ceuta y Melilla ya tienen su rótulo junto al punto
@@ -2518,11 +2590,13 @@ $("#m-due").addEventListener("click", () => {
   closeSheet(); newGame(ids);
   toast(null, "Repaso del día: <b>" + ids.length + "</b> " + tx("provincias", "países") + " que se te resisten", "ok", 2600);
 });
+$("#flagCa").checked = store.get("atlas:flagCa") === true;
+$("#flagCa").addEventListener("change", () => { store.set("atlas:flagCa", $("#flagCa").checked); if (S.mode === "flag") newGame(); });
 $("#capOnly").checked = store.get("atlas:capOnly") !== false;
 $("#capOnly").addEventListener("change", () => { store.set("atlas:capOnly", capOnly()); if (S.mode === "cap") newGame(); });
 function renderModeExtras() {
-  $("#capOnlyRow").hidden = S.mode !== "cap"; $("#duelRow").hidden = S.mode !== "duel";
-  $("#modeOpts").hidden = S.mode !== "cap" && S.mode !== "duel"; // la zona ya va arriba
+  $("#capOnlyRow").hidden = S.mode !== "cap"; $("#duelRow").hidden = S.mode !== "duel"; $("#flagCaRow").hidden = EU || S.mode !== "flag";
+  $("#modeOpts").hidden = S.mode !== "cap" && S.mode !== "duel" && (EU || S.mode !== "flag"); // la zona ya va arriba
   if (TAB_OF[S.mode]) showTab(TAB_OF[S.mode]);
   renderTopTabs();
   const b = $('.modes button[data-mode="' + S.mode + '"]');
@@ -2573,6 +2647,11 @@ function cambiarMapa(m) {
   IK.hoja(`<div class="aj"><h2>¿Cambiar a ${{ eu: "Europa", am: "América", as: "Asia", af: "África", oc: "Oceanía", es: "España" }[m]}?</h2><p>Perderás lo que llevas en esta partida. Tus récords y tu repaso de cada mapa se guardan aparte.</p>
     <div class="ajrow"><button class="ik-btn ik-ghost" data-ik="cerrar">Seguir jugando</button><button class="ik-btn" id="mapaYes">Cambiar de mapa</button></div></div>`, "Cambiar de mapa");
   $("#mapaYes").onclick = ir;
+}
+if (!EU) { // España también tiene Banderas: las de las provincias o las de las comunidades
+  $("#m-flag").hidden = false; $("#m-flag").querySelector("span").textContent = "¿De qué provincia es?";
+  setTimeout(() => { ALL.filter(id => !SIN_BANDERA.includes(id)).map(id => "banderas/es/" + id + ".webp").concat(Object.values(CA_N).map(n => "banderas/es/ca-" + n + ".webp"))
+    .forEach(u => { try { fetch(u).catch(() => {}); } catch (e) {} }); }, 4000);
 }
 if (/[?&]mapa=/.test(location.search)) history.replaceState(history.state, "", location.pathname);
 
@@ -2635,6 +2714,9 @@ if ("serviceWorker" in navigator) {
 (function () {
   const VERSION = document.querySelector('meta[name="app-version"]').content;
   const NOVEDADES = [
+    ["4.1", ["🏳️ Banderas también en España: ¿de qué provincia es? Y, marcando la casilla, las de las 17 comunidades autónomas, Ceuta y Melilla",
+             "🔎 En Explorar, al tocar una provincia sale su bandera",
+             "ℹ️ Alicante, Castellón, Valencia y A Coruña no tienen bandera provincial y no se preguntan"]],
     ["4.0", ["🏝️ Nuevo en «Elige zona»: «Sin países pequeños» quita los países e islas diminutos (Andorra, Malta, las islas del Caribe y del Pacífico…), si no quieres que salgan"]],
     ["3.9", ["🌍 ¡El mundo entero! Nuevos mapas de Asia (47 países), África (54) y Oceanía (14), con capitales y banderas",
              "🗺️ Cada continente con sus regiones de la ONU como zonas para jugar",
@@ -2681,7 +2763,7 @@ if ("serviceWorker" in navigator) {
       <p>Creada por <b>Adela Moreno Vega</b> y <b>Carlos Moreno Otto</b>.</p>
       <p class="ik-muted">© ${new Date().getFullYear()} Adela Moreno Vega y Carlos Moreno Otto. Todos los derechos reservados. Uso personal y educativo gratuito.</p>
       <h3>Fuentes</h3>
-      <p class="ik-muted">Mapa de Europa: Natural Earth (dominio público), con Crimea dentro de Ucrania y Chipre entero. Regiones de Europa: geoesquema de la ONU (M49), con Chipre en el sur. Banderas: flag-icons, de Panayiotis Lipiridis (licencia MIT). Mapa de América: Natural Earth (dominio público), sin Hawái; Groenlandia, Guayana Francesa, Puerto Rico y las Malvinas, de fondo. Regiones de América: geoesquema de la ONU (M49), con México en América Central. Bolivia: capital constitucional Sucre (el Gobierno está en La Paz). Mapas de Asia, África y Oceanía: Natural Earth (dominio público), con Somalilandia dentro de Somalia; Taiwán, el Sáhara Occidental y los territorios no independientes, de fondo. Regiones: geoesquema de la ONU (M49). Israel y Palestina no salen en Capitales porque su capital está en disputa. Guinea Ecuatorial: Ciudad de la Paz, capital desde enero de 2026.</p>
+      <p class="ik-muted">Mapa de Europa: Natural Earth (dominio público), con Crimea dentro de Ucrania y Chipre entero. Regiones de Europa: geoesquema de la ONU (M49), con Chipre en el sur. Banderas: flag-icons, de Panayiotis Lipiridis (licencia MIT). Mapa de América: Natural Earth (dominio público), sin Hawái; Groenlandia, Guayana Francesa, Puerto Rico y las Malvinas, de fondo. Regiones de América: geoesquema de la ONU (M49), con México en América Central. Bolivia: capital constitucional Sucre (el Gobierno está en La Paz). Mapas de Asia, África y Oceanía: Natural Earth (dominio público), con Somalilandia dentro de Somalia; Taiwán, el Sáhara Occidental y los territorios no independientes, de fondo. Regiones: geoesquema de la ONU (M49). Israel y Palestina no salen en Capitales porque su capital está en disputa. Guinea Ecuatorial: Ciudad de la Paz, capital desde enero de 2026. Banderas de las provincias y comunidades de España: Wikimedia Commons, vía iso3166-flag-icons de Andrew McKenna (licencia MIT); algunas provincias usan como bandera la de su diputación provincial.</p>
       <h3>Aviso</h3>
       <p class="ik-muted">Esta app es una ayuda para repasar y puede contener errores. <b>En caso de error o duda, la fuente fiable es el material oficial de la asignatura</b> (libro de texto y apuntes del profesorado).</p>
       <h3>Versión</h3>

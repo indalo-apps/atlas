@@ -18,6 +18,7 @@ Adela Moreno Vega y Carlos Moreno Otto.
 - Mapa de América: Natural Earth 1:50m (dominio público), vía world-atlas, sin Hawái. Groenlandia, Guayana Francesa, Puerto Rico, las Malvinas y los demás territorios no independientes se dibujan de fondo y no se preguntan.
 - Regiones de América: geoesquema de la ONU (M49), con México en América Central. Bolivia: se pregunta Sucre (capital constitucional); el Gobierno está en La Paz.
 - Mapas de Asia, África y Oceanía: Natural Earth 1:50m (dominio público), vía world-atlas; Somalilandia dentro de Somalia; Taiwán, el Sáhara Occidental y los territorios no independientes se dibujan de fondo y no se preguntan. Regiones: geoesquema de la ONU (M49). Israel y Palestina no salen en el modo Capitales (capital en disputa). Guinea Ecuatorial: Ciudad de la Paz (capital desde enero de 2026).
+- Banderas de las provincias y comunidades de España (`banderas/es/`, en WebP): Wikimedia Commons, vía [iso3166-flag-icons](https://github.com/amckenna41/iso3166-flag-icons) de Andrew McKenna (MIT). Alicante, Castellón, Valencia y A Coruña no tienen bandera provincial y no se preguntan; algunas provincias usan la bandera de su diputación.
 - Regiones de Europa: geoesquema de la ONU (M49); Chipre, en Europa del Sur.
 - Banderas: [flag-icons](https://github.com/lipis/flag-icons) de Panayiotis Lipiridis, licencia MIT (`banderas/LICENSE-flag-icons.txt`).
 
