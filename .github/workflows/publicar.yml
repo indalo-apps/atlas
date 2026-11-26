@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.despliegue.outputs.page_url }}
+      url: ${{ steps.despliegue.outputs.page_url || steps.despliegue2.outputs.page_url }}
     steps:
       - uses: actions/checkout@v5
       - name: Quitar lo que no hace falta en la web
@@ -44,4 +44,11 @@ jobs:
       - uses: actions/upload-pages-artifact@v4
         with: { path: . }
       - id: despliegue
+        uses: actions/deploy-pages@v4
+        continue-on-error: true  # a veces GitHub aún no encuentra el paquete recién subido
+      - name: Esperar y volver a intentarlo
+        if: steps.despliegue.outcome == 'failure'
+        run: sleep 30
+      - id: despliegue2
+        if: steps.despliegue.outcome == 'failure'
         uses: actions/deploy-pages@v4
