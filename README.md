@@ -6,6 +6,8 @@ App para aprender las provincias de España, sus capitales y comunidades jugando
 
 Se publica con GitHub Pages: https://indalo-apps.github.io/atlas/
 
+Antes de publicar, pasar la prueba `pruebas/partidas.py` (ver su cabecera): debe acabar en «TOTAL ERRORES: 0». Los mapas de continentes se generan con `herramientas/continente.js`.
+
 Para sacar una versión nueva: subir el número en `<meta name="app-version">` (index.html) y en `CACHE` (sw.js), y añadir sus novedades en `NOVEDADES`.
 
 El mapa de Europa está en `europa.js` (países, capitales y fronteras) y las banderas en `banderas/`. El de América está en `america.js`. Enlace directo a cada mapa: `?mapa=espana`, `europa`, `america`, `asia`, `africa` u `oceania` (datos en `asia.js`, `africa.js` y `oceania.js`). Los móviles que la tengan abierta se actualizan solos, sin cortar una partida a medias.
