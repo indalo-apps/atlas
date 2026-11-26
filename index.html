@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="4.2">
+<meta name="app-version" content="4.3">
 <title>Atlas</title>
 <meta name="author" content="Adela Moreno Vega y Carlos Moreno Otto">
 <meta name="copyright" content="© 2026 Adela Moreno Vega y Carlos Moreno Otto. Todos los derechos reservados.">
@@ -25,8 +25,8 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Atlas · España y el mundo">
 <meta property="og:description" content="Aprende las provincias de España y los países del mundo, por continentes, con sus capitales y banderas y comunidades jugando con el mapa.">
-<meta property="og:url" content="https://indalo-apps.github.io/atlas-provincias/">
-<meta property="og:image" content="https://indalo-apps.github.io/atlas-provincias/og.png">
+<meta property="og:url" content="https://indalo-apps.github.io/atlas/">
+<meta property="og:image" content="https://indalo-apps.github.io/atlas/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -987,7 +987,7 @@ const IK = (function(){
     <img id="shareImg" alt="Mapa con el resultado de la partida">
     <p class="note">Mantén pulsada la imagen para guardarla o enviarla.</p>
     <div class="row">
-      <a class="btn primary" id="shareDl" download="atlas-provincias.png" href="#">Descargar</a>
+      <a class="btn primary" id="shareDl" download="atlas.png" href="#">Descargar</a>
       <button class="btn" id="shareClose">Cerrar</button>
     </div>
   </div>
@@ -2245,14 +2245,14 @@ async function makeShareImage() {
     x.strokeStyle = col.line; x.lineWidth = 1.5; x.strokeRect(lx, 1258, 30, 30);
     x.fillStyle = col.muted; x.fillText(txt, lx + 42, 1283); lx += 42 + x.measureText(txt).width + 36;
   });
-  x.fillStyle = col.muted; x.font = "700 26px " + BODY; x.textAlign = "right"; x.fillText("indalo-apps.github.io/atlas-provincias", W - 64, 1328);
+  x.fillStyle = col.muted; x.font = "700 26px " + BODY; x.textAlign = "right"; x.fillText("indalo-apps.github.io/atlas", W - 64, 1328);
   return new Promise(res => cv.toBlob(res, "image/png"));
 }
 async function shareResult() {
   const btn = $("#e-share"); btn.disabled = true;
   try {
     const blob = await makeShareImage();
-    const file = new File([blob], "atlas-provincias.png", { type: "image/png" });
+    const file = new File([blob], "atlas.png", { type: "image/png" });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       try { await navigator.share({ files: [file], title: "Atlas" }); return; }
       catch (e) { if (e && e.name === "AbortError") return; }
@@ -2771,6 +2771,7 @@ if ("serviceWorker" in navigator) {
 (function () {
   const VERSION = document.querySelector('meta[name="app-version"]').content;
   const NOVEDADES = [
+    ["4.3", ["🔗 Nueva dirección: indalo-apps.github.io/atlas. La antigua te trae aquí sola; si la tenías instalada, vuelve a añadirla a la pantalla de inicio desde la nueva"]],
     ["4.2", ["🗺️ ¡Comunidades autónomas! En España, elige «Provincias» o «Comunidades»: encuéntralas, sus capitales, siluetas, gentilicios y banderas",
              "✨ La app se llama ahora «Atlas»: España, Europa y el resto del mundo",
              "🏳️ Explorar avisa de las banderas provinciales que no son oficiales o ya no se usan (Girona, Lleida, Tarragona, Zamora…); esas tres primeras ya no se preguntan"]],
