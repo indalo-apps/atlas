@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="4.3">
+<meta name="app-version" content="4.3.1">
 <title>Atlas</title>
 <meta name="author" content="Adela Moreno Vega y Carlos Moreno Otto">
 <meta name="copyright" content="© 2026 Adela Moreno Vega y Carlos Moreno Otto. Todos los derechos reservados.">
@@ -1765,9 +1765,15 @@ function newGame(onlyIds) {
   $("#toasts").innerHTML = "";
   clearMarks();
   S.pool = poolFor(S.region);
-  let base = (onlyIds || S.pool).slice(), capAviso = false;
-  if (S.mode === "gent") base = base.filter(id => (CA ? GENT_CA : GENT)[id]);
-  if (S.mode === "shape" && NO_SHAPE.length) { const b2 = base.filter(id => !NO_SHAPE.includes(id)); if (b2.length) base = b2; }
+  let base = (onlyIds || S.pool).slice(), capAviso = false, gentAviso = false, shapeAviso = false;
+  if (S.mode === "gent") { // Las dos provincias de Canarias no tienen gentilicio propio: esa zona se juega con toda España
+    const conG = id => (CA ? GENT_CA : GENT)[id], g = base.filter(conG);
+    if (g.length) base = g; else { base = ALL.filter(conG); S.pool = base.slice(); gentAviso = true; }
+  }
+  if (S.mode === "shape" && NO_SHAPE.length) { // islas diminutas: sin silueta; si la zona solo tiene de esas, se juega con todo el mapa
+    const b2 = base.filter(id => !NO_SHAPE.includes(id));
+    if (b2.length) base = b2; else if (!onlyIds) { base = ALL.filter(id => !NO_SHAPE.includes(id)); S.pool = base.slice(); shapeAviso = true; }
+  }
   if (S.mode === "duel") { // 10 rondas por jugador como mucho, alternando turnos
     S.rounds = Math.max(1, Math.min(10, Math.floor(base.length / 2)));
     base = shuffle(base).slice(0, S.rounds * 2);
@@ -1811,6 +1817,8 @@ function newGame(onlyIds) {
     S.timer = setInterval(tickClock, 200); tickClock();
   }
   next();
+  if (shapeAviso) toast(null, "Las islas de esta zona son tan pequeñas que no tienen silueta: juegas con todo el mapa", "warn", 3600);
+  if (gentAviso) toast(null, "Las provincias de Canarias no tienen gentilicio propio: juegas con toda España", "warn", 3600);
   if (capAviso) toast(null, tx("En esta zona todas las capitales se llaman como su provincia", "En esta zona todas las capitales se llaman como su país"), "warn", 3200);
   renderDue();
 }
@@ -2771,6 +2779,9 @@ if ("serviceWorker" in navigator) {
 (function () {
   const VERSION = document.querySelector('meta[name="app-version"]').content;
   const NOVEDADES = [
+    ["4.3.1", ["🛠️ Arreglado: en Oceanía las partidas se cortaban al empezar",
+             "🛠️ Siluetas en Micronesia y Polinesia: sus islas son diminutas, así que se juega con toda Oceanía",
+             "🛠️ Gentilicios con la zona Canarias: como sus provincias no tienen gentilicio propio, se juega con toda España (y te lo avisa)"]],
     ["4.3", ["🔗 Nueva dirección: indalo-apps.github.io/atlas. La antigua te trae aquí sola; si la tenías instalada, vuelve a añadirla a la pantalla de inicio desde la nueva"]],
     ["4.2", ["🗺️ ¡Comunidades autónomas! En España, elige «Provincias» o «Comunidades»: encuéntralas, sus capitales, siluetas, gentilicios y banderas",
              "✨ La app se llama ahora «Atlas»: España, Europa y el resto del mundo",
