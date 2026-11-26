@@ -2,6 +2,7 @@
 (function () {
   const VERSION = document.querySelector('meta[name="app-version"]').content;
   const NOVEDADES = [
+    ["5.0.2", ["🛠️ Duelo en el móvil: al elegirlo se ven los nombres y el botón para empezar, sin salirse de la pantalla"]],
     ["5.0.1", ["🛠️ Arreglado: en Banderas de España, debajo de la bandera ya no pregunta por un «país»",
              "🛠️ Gentilicios en el mapa de comunidades: «Toca su comunidad»",
              "⚡ Los mapas de los continentes pesan tres veces menos"]],

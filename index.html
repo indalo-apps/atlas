@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="5.0.1">
+<meta name="app-version" content="5.0.2">
 <title>Atlas</title>
 <meta name="author" content="Adela Moreno Vega y Carlos Moreno Otto">
 <meta name="copyright" content="© 2026 Adela Moreno Vega y Carlos Moreno Otto. Todos los derechos reservados.">
@@ -345,7 +345,8 @@ label.field { display: flex; flex-direction: column; gap: 6px; font-size: 0.85re
 .turn { position: absolute; top: 12px; right: 12px; padding: 6px 12px; border-radius: 99px; color: #fff; font: 800 .95rem/1.1 var(--f-display);
   background: var(--pc, var(--p1)); max-width: 45%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tally .tile.duel1 { --c: var(--p1); } .tally .tile.duel2 { --c: var(--p2); }
-.duelnames { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.duelnames { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.duelnames input { width: 100%; min-width: 0; box-sizing: border-box; }
 .duelnames label { display: flex; flex-direction: column; gap: 4px; font-size: .8rem; color: var(--muted); font-weight: 700; }
 .duelnames input { font: inherit; font-size: 1rem; font-weight: 700; color: var(--ink); background: var(--bg); border: 1.5px solid transparent;
   border-radius: 10px; padding: 9px 10px; min-width: 0; }
@@ -2682,6 +2683,9 @@ function renderModeExtras() {
   renderTopTabs();
   const b = $('.modes button[data-mode="' + S.mode + '"]');
   $("#optsTitle").textContent = "Opciones · " + (b ? b.querySelector("b").textContent : "");
+  // si acabas de tocar un modo con opciones (Duelo, Capitales…), que se vean: en el móvil salían fuera de la pantalla
+  if (!$("#modeOpts").hidden && document.activeElement && document.activeElement.closest && document.activeElement.closest(".modes"))
+    requestAnimationFrame(() => $("#modeOpts").scrollIntoView({ block: "nearest", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }));
   renderDue();
 }
 ["#p1n", "#p2n"].forEach((sel, i) => {
@@ -2814,6 +2818,7 @@ if (mqHome.matches || (!savedMode && mqMobile.matches)) openSheet(true);
 (function () {
   const VERSION = document.querySelector('meta[name="app-version"]').content;
   const NOVEDADES = [
+    ["5.0.2", ["🛠️ Duelo en el móvil: al elegirlo se ven los nombres y el botón para empezar, sin salirse de la pantalla"]],
     ["5.0.1", ["🛠️ Arreglado: en Banderas de España, debajo de la bandera ya no pregunta por un «país»",
              "🛠️ Gentilicios en el mapa de comunidades: «Toca su comunidad»",
              "⚡ Los mapas de los continentes pesan tres veces menos"]],

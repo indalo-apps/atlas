@@ -62,6 +62,9 @@ function renderModeExtras() {
   renderTopTabs();
   const b = $('.modes button[data-mode="' + S.mode + '"]');
   $("#optsTitle").textContent = "Opciones · " + (b ? b.querySelector("b").textContent : "");
+  // si acabas de tocar un modo con opciones (Duelo, Capitales…), que se vean: en el móvil salían fuera de la pantalla
+  if (!$("#modeOpts").hidden && document.activeElement && document.activeElement.closest && document.activeElement.closest(".modes"))
+    requestAnimationFrame(() => $("#modeOpts").scrollIntoView({ block: "nearest", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }));
   renderDue();
 }
 ["#p1n", "#p2n"].forEach((sel, i) => {
