@@ -125,7 +125,7 @@ function next() {
     $("#prompt").textContent = "¿Dónde viven los…";
     const g = gents(S.cur); S.gentTxt = g[Math.floor(Math.random() * g.length)];
     $("#target").textContent = S.gentTxt;
-    $("#sub").textContent = "Toca su provincia en el mapa";
+    $("#sub").textContent = tx("Toca su provincia en el mapa", "Toca su país en el mapa");
   } else if (S.mode === "shape") {
     $("#prompt").textContent = tx("¿Qué provincia tiene esta forma?", "¿Qué país tiene esta forma?");
     $("#target").textContent = "¿?";
@@ -136,6 +136,7 @@ function next() {
     buildOptions();
   } else if (S.mode === "flag") {
     $("#prompt").textContent = tx(FCA() ? "¿De qué comunidad es esta bandera?" : "¿De qué provincia es esta bandera?", "¿De qué país es esta bandera?");
+    $("#flagbox p").textContent = $("#prompt").textContent; // debajo de la bandera, la misma pregunta (antes decía siempre «país»)
     $("#target").textContent = "¿?";
     $("#sub").textContent = "";
     $("#flagImg").src = flagSrc(S.cur);

@@ -50,7 +50,7 @@ REGIONS.forEach(([v]) => {
   b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="zn"></span><span class="zc"></span><span class="sr-only"></span>';
   b.querySelector(".zn").textContent = zoneName(v);
   b.querySelector(".zc").textContent = zoneCount(v);
-  b.querySelector(".sr-only").textContent = EU ? " países" : v === "all" ? " provincias y ciudades" : " provincias";
+  b.querySelector(".sr-only").textContent = EU ? " países" : CA ? " comunidades" : v === "all" ? " provincias y ciudades" : " provincias";
   b.addEventListener("click", () => {
     if (S.region === v) return closeZones();
     if (enCurso()) { // se perdería lo respondido: se pregunta antes

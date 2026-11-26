@@ -2,6 +2,9 @@
 (function () {
   const VERSION = document.querySelector('meta[name="app-version"]').content;
   const NOVEDADES = [
+    ["5.0.1", ["🛠️ Arreglado: en Banderas de España, debajo de la bandera ya no pregunta por un «país»",
+             "🛠️ Gentilicios en el mapa de comunidades: «Toca su comunidad»",
+             "⚡ Los mapas de los continentes pesan tres veces menos"]],
     ["5.0", ["⚡ Abre más rápido: cada mapa carga solo sus datos",
              "🪶 Banderas más ligeras",
              "🛠️ Por dentro, la app está ordenada en piezas y se prueba sola antes de publicarse"]],

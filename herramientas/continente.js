@@ -23,13 +23,13 @@ const sh=x=>C.shift&&x< -100?x+360:x;
 const [x0,y0,x1,y1]=C.bbox, box=[[[x0,y0],[x1,y0],[x1,y1],[x0,y1],[x0,y0]]];
 const out=[];
 fc.forEach(f=>{
-  let g=polys(f).map(p=>p.map(r=>{ const xs=r.map(q=>q[0]), mx=Math.max(...xs), mn=Math.min(...xs); if(!C.shift) return r; if(mx< -100) return r.map(q=>[q[0]+360,q[1]]); if(mn< -100&&mx>100) return r.map(q=>[q[0]<0?q[0]+360:q[0],q[1]]); return r; }));
+  let g=polys(f).map(p=>p.map(r=>{ const xs=r.map(q=>q[0]), mx=Math.max(...xs), mn=Math.min(...xs); if(!C.shift) return r.some((q,i)=>i&&Math.abs(q[0]-r[i-1][0])>180)?r.map(q=>[q[0]<0?q[0]+360:q[0],q[1]]):r; /* anillos que cruzan los 180° (Rusia por Chukotka): se desenrollan antes de recortar */ if(mx< -100) return r.map(q=>[q[0]+360,q[1]]); if(mn< -100&&mx>100) return r.map(q=>[q[0]<0?q[0]+360:q[0],q[1]]); return r; }));
   let r; try{ r=pc.intersection(g,box);}catch(e){console.error("err",f.properties.name);return;}
   if(!r.length) return;
   const id=A2[f.id]||(f.id==="XK"?"XK":"x"+(f.id||f.properties.name.replace(/\W/g,"")));
   r=r.map(p=>p.map(ring=>ring.slice().reverse()));
   const ar=r.map(p=>d3.geoArea({type:"Polygon",coordinates:p})), mx=Math.max(...ar);
-  const min=A2[f.id]?2e-7:3e-6;
+  const min=A2[f.id]?(C.islote||2e-7):3e-6;
   r=r.filter((p,i)=>ar[i]===mx||ar[i]>min);
   if(!A2[f.id]&&mx<min) return;
   const ya=out.find(o=>o.id===id); if(ya){ ya.geometry.coordinates=ya.geometry.coordinates.concat(r); return; } // un país en varias piezas (Australia y sus islotes)
@@ -40,11 +40,22 @@ C.l.forEach(([a,,,,,,lo,la])=>{ if(out.some(f=>f.id===a)) return; lo=sh(lo); con
   out.push({type:"Feature",id:a,properties:{},geometry:{type:"MultiPolygon",coordinates:[[[[lo-e,la-e],[lo-e,la+e],[lo+e,la+e],[lo+e,la-e],[lo-e,la-e]]]]}}); console.log("añadido",a); });
 let t=srv.topology({provinces:{type:"FeatureCollection",features:out}},6e4);
 t=simp.presimplify(t);
-// los países diminutos (Vaticano, San Marino, Malta…) no se simplifican, para que no se queden sin superficie
+// Más detalle en los países del juego que en el fondo, y ninguna isla se queda sin superficie
 { const peq=new Set(out.filter(f=>{const [[a,b],[c,d]]=d3.geoBounds(f);return c-a<1.5&&d-b<1.5;}).map(f=>f.id));
-  const marca=x=>Array.isArray(x)?x.forEach(marca):t.arcs[x<0?~x:x].forEach(q=>q[2]=Infinity);
-  t.objects.provinces.geometries.forEach(g=>{ if(peq.has(g.id)) marca(g.arcs); }); }
-t=simp.simplify(t,simp.quantile(t,+Q));
+  const juego=new Set(), todo=x=>Array.isArray(x)?x.flatMap(todo):[x<0?~x:x];
+  t.objects.provinces.geometries.forEach(g=>{ if(A2[g.id]===undefined&&C.l.some(r=>r[0]===g.id)) todo(g.arcs).forEach(a=>juego.add(a)); });
+  const thr=simp.quantile(t,+Q), K=+(process.env.DETALLE||C.detalle||1);
+  const KF=+(process.env.FONDO||C.fondo||1);
+  t.arcs.forEach((a,i)=>{ a.forEach(q=>q[2]*=juego.has(i)?K:1/KF);
+    const cerrado=a.length>4&&a[0][0]===a[a.length-1][0]&&a[0][1]===a[a.length-1][1];
+    if(cerrado) a.slice(1,-1).sort((x,y)=>y[2]-x[2]).slice(0,3).forEach(q=>{ if(q[2]<thr) q[2]=Infinity; }); });
+  t.objects.provinces.geometries.forEach(g=>{ if(peq.has(g.id)) todo(g.arcs).forEach(i=>t.arcs[i].forEach(q=>q[2]=Infinity)); });
+  t=simp.simplify(t,thr);
+  // fuera los trocitos que se quedan sin superficie al simplificar
+  t.objects.provinces.geometries.forEach(g=>{ if(g.type!=="MultiPolygon") return;
+    const ok=g.arcs.filter(pa=>d3.geoArea(topo.feature(t,{type:"Polygon",arcs:pa}))>1e-9);
+    if(ok.length) g.arcs=ok; }); }
+t=topo.quantize(t,6e4); // coordenadas enteras y en diferencias: el archivo pesa mucho menos
 t.objects.provinces.geometries.forEach(g=>{g.properties={id:g.id};});
 const tf=topo.feature(t,t.objects.provinces).features;
 const vacios=C.l.map(r=>r[0]).filter(a=>{const f=tf.find(x=>x.id===a);return !f||!f.geometry;});

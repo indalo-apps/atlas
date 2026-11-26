@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="app-version" content="5.0">
+<meta name="app-version" content="5.0.1">
 <title>Atlas</title>
 <meta name="author" content="Adela Moreno Vega y Carlos Moreno Otto">
 <meta name="copyright" content="© 2026 Adela Moreno Vega y Carlos Moreno Otto. Todos los derechos reservados.">
@@ -1883,7 +1883,7 @@ function next() {
     $("#prompt").textContent = "¿Dónde viven los…";
     const g = gents(S.cur); S.gentTxt = g[Math.floor(Math.random() * g.length)];
     $("#target").textContent = S.gentTxt;
-    $("#sub").textContent = "Toca su provincia en el mapa";
+    $("#sub").textContent = tx("Toca su provincia en el mapa", "Toca su país en el mapa");
   } else if (S.mode === "shape") {
     $("#prompt").textContent = tx("¿Qué provincia tiene esta forma?", "¿Qué país tiene esta forma?");
     $("#target").textContent = "¿?";
@@ -1894,6 +1894,7 @@ function next() {
     buildOptions();
   } else if (S.mode === "flag") {
     $("#prompt").textContent = tx(FCA() ? "¿De qué comunidad es esta bandera?" : "¿De qué provincia es esta bandera?", "¿De qué país es esta bandera?");
+    $("#flagbox p").textContent = $("#prompt").textContent; // debajo de la bandera, la misma pregunta (antes decía siempre «país»)
     $("#target").textContent = "¿?";
     $("#sub").textContent = "";
     $("#flagImg").src = flagSrc(S.cur);
@@ -2404,7 +2405,7 @@ REGIONS.forEach(([v]) => {
   b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span class="zn"></span><span class="zc"></span><span class="sr-only"></span>';
   b.querySelector(".zn").textContent = zoneName(v);
   b.querySelector(".zc").textContent = zoneCount(v);
-  b.querySelector(".sr-only").textContent = EU ? " países" : v === "all" ? " provincias y ciudades" : " provincias";
+  b.querySelector(".sr-only").textContent = EU ? " países" : CA ? " comunidades" : v === "all" ? " provincias y ciudades" : " provincias";
   b.addEventListener("click", () => {
     if (S.region === v) return closeZones();
     if (enCurso()) { // se perdería lo respondido: se pregunta antes
@@ -2813,6 +2814,9 @@ if (mqHome.matches || (!savedMode && mqMobile.matches)) openSheet(true);
 (function () {
   const VERSION = document.querySelector('meta[name="app-version"]').content;
   const NOVEDADES = [
+    ["5.0.1", ["🛠️ Arreglado: en Banderas de España, debajo de la bandera ya no pregunta por un «país»",
+             "🛠️ Gentilicios en el mapa de comunidades: «Toca su comunidad»",
+             "⚡ Los mapas de los continentes pesan tres veces menos"]],
     ["5.0", ["⚡ Abre más rápido: cada mapa carga solo sus datos",
              "🪶 Banderas más ligeras",
              "🛠️ Por dentro, la app está ordenada en piezas y se prueba sola antes de publicarse"]],
