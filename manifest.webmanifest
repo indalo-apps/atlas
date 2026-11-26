@@ -1,7 +1,7 @@
 {
-  "name": "Atlas de Provincias",
-  "short_name": "Provincias",
-  "description": "Aprende las provincias de España, sus capitales y comunidades jugando con el mapa.",
+  "name": "Atlas",
+  "short_name": "Atlas",
+  "description": "Aprende las provincias y comunidades de España y los países del mundo, con sus capitales y banderas, jugando con el mapa.",
   "start_url": "./",
   "scope": "./",
   "id": "./",

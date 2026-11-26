@@ -1,8 +1,8 @@
-# Atlas de Provincias
+# Atlas
 
 © 2026 **Adela Moreno Vega** y **Carlos Moreno Otto**. Todos los derechos reservados (ver [LICENSE](LICENSE)).
 
-App para aprender las provincias de España, sus capitales y comunidades jugando con el mapa: explorar, repasar, practicar (dónde está, cuál es, capitales, gentilicios, siluetas) y retos (contrarreloj y duelo). Desde la 3.7 tiene también el mapa de **Europa** (45 países, con zonas Unión Europea y regiones de la ONU) y el modo **Banderas**; se elige arriba, «España / Europa». Desde la 3.8, también el mapa de **América** (35 países: Norte, Central, Caribe y Sur, con la zona «Habla hispana»). Desde la 3.9, también **Asia** (47 países), **África** (54) y **Oceanía** (14). Se puede instalar en el móvil y funciona sin conexión.
+App para aprender las provincias de España, sus capitales y comunidades jugando con el mapa: explorar, repasar, practicar (dónde está, cuál es, capitales, gentilicios, siluetas) y retos (contrarreloj y duelo). Desde la 3.7 tiene también el mapa de **Europa** (45 países, con zonas Unión Europea y regiones de la ONU) y el modo **Banderas**; se elige arriba, «España / Europa». Desde la 3.8, también el mapa de **América** (35 países: Norte, Central, Caribe y Sur, con la zona «Habla hispana»). Desde la 3.9, también **Asia** (47 países), **África** (54) y **Oceanía** (14). Desde la 4.2 se llama **Atlas** y España se puede jugar por **provincias** o por **comunidades autónomas** (`?mapa=comunidades`). Se puede instalar en el móvil y funciona sin conexión.
 
 Se publica con GitHub Pages: https://indalo-apps.github.io/atlas-provincias/
 
